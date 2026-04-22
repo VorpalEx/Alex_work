@@ -1,0 +1,78 @@
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "company_name": "DEMO ENTREPRISE",
+  "version": "1.0.0",
+  "pdf_source_path": "",
+  "created_at": "2026-04-22T00:00:00",
+  "description": "Jumeau numérique de démonstration — remplacé lors du build.",
+  "nodes": [
+    {
+      "id": "node-start",
+      "label": "Démarrage",
+      "node_type": "start",
+      "description": "Point d'entrée du processus",
+      "saas_provider": null,
+      "saas_module_id": "",
+      "position_x": 40.0,
+      "position_y": 40.0,
+      "status": "idle",
+      "metadata": {},
+      "sla": null
+    },
+    {
+      "id": "node-step1",
+      "label": "Validation humaine",
+      "node_type": "human",
+      "description": "Étape de validation manuelle",
+      "saas_provider": null,
+      "saas_module_id": "",
+      "position_x": 250.0,
+      "position_y": 40.0,
+      "status": "idle",
+      "metadata": {},
+      "sla": {
+        "step_id": "node-step1",
+        "max_duration_seconds": 300,
+        "description": "Max 5 minutes de validation",
+        "warning_threshold_pct": 0.2
+      }
+    },
+    {
+      "id": "node-step2",
+      "label": "Traitement automatique",
+      "node_type": "automated",
+      "description": "Déclenchement du workflow SaaS",
+      "saas_provider": "zapier",
+      "saas_module_id": "demo-zap-001",
+      "position_x": 460.0,
+      "position_y": 40.0,
+      "status": "idle",
+      "metadata": {},
+      "sla": {
+        "step_id": "node-step2",
+        "max_duration_seconds": 60,
+        "description": "Max 1 minute de traitement",
+        "warning_threshold_pct": 0.2
+      }
+    },
+    {
+      "id": "node-end",
+      "label": "Fin",
+      "node_type": "end",
+      "description": "Point de sortie du processus",
+      "saas_provider": null,
+      "saas_module_id": "",
+      "position_x": 670.0,
+      "position_y": 40.0,
+      "status": "idle",
+      "metadata": {},
+      "sla": null
+    }
+  ],
+  "edges": [
+    {"id": "e1", "source_id": "node-start",  "target_id": "node-step1", "label": "", "condition": ""},
+    {"id": "e2", "source_id": "node-step1",  "target_id": "node-step2", "label": "", "condition": ""},
+    {"id": "e3", "source_id": "node-step2",  "target_id": "node-end",   "label": "", "condition": ""}
+  ],
+  "saas_configs": {}
+}
