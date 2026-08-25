@@ -31,6 +31,28 @@ Google Analytics 4 ──────(vues, temps sur page, conversions)──�
 
 ---
 
+## Mode « dashboard autonome » (sans Notion)
+
+Si tu n'as pas encore les accès Notion, tu peux visualiser tes données dans un
+**tableau de bord HTML autonome** — il ne dépend **que des accès Google**.
+
+```bash
+cd seo-tracker
+pip install -r requirements.txt
+python -m seo_tracker.report out          # -> out/dashboard.html + out/articles.csv + out/keywords.csv
+```
+
+Ouvre `out/dashboard.html` dans un navigateur : tuiles KPI, top articles, listing
+complet des mots-clés (triable + recherche), quick wins (positions 5–15).
+
+En automatique : le workflow **`.github/workflows/seo-dashboard.yml`** (quotidien +
+manuel) génère le dashboard et le publie comme **artefact téléchargeable** dans
+l'onglet *Actions → le run → Artifacts*. Il ne requiert que les secrets
+`GOOGLE_CREDENTIALS_JSON`, `GSC_SITE_URL`, `GA4_PROPERTY_ID`.
+
+> Le dashboard et la synchro Notion partagent la même collecte de données : quand
+> les accès Notion seront prêts, active simplement le workflow *SEO Tracker*.
+
 ## Installation (à faire une fois)
 
 ### 1. Google Cloud — compte de service

@@ -37,10 +37,10 @@ class Config:
     gsc_site_url: str
     ga4_property_id: str
 
-    # Notion
-    notion_token: str
-    notion_db_articles: str
-    notion_db_keywords: str
+    # Notion (optionnel : non requis pour le dashboard autonome)
+    notion_token: str | None
+    notion_db_articles: str | None
+    notion_db_keywords: str | None
 
     # Rapport
     lookback_days: int
@@ -59,7 +59,7 @@ class Config:
         return date.today() - timedelta(days=3)
 
     @classmethod
-    def from_env(cls) -> "Config":
+    def from_env(cls, require_notion: bool = True) -> "Config":
         cred_json = _get("GOOGLE_CREDENTIALS_JSON")
         cred_path = _get("GOOGLE_APPLICATION_CREDENTIALS")
         if not cred_json and not cred_path:
@@ -78,9 +78,9 @@ class Config:
             ga4_property_id=str(_get("GA4_PROPERTY_ID", required=True)).replace(
                 "properties/", ""
             ),
-            notion_token=_get("NOTION_TOKEN", required=True),
-            notion_db_articles=_get("NOTION_DB_ARTICLES", required=True),
-            notion_db_keywords=_get("NOTION_DB_KEYWORDS", required=True),
+            notion_token=_get("NOTION_TOKEN", required=require_notion),
+            notion_db_articles=_get("NOTION_DB_ARTICLES", required=require_notion),
+            notion_db_keywords=_get("NOTION_DB_KEYWORDS", required=require_notion),
             lookback_days=int(_get("LOOKBACK_DAYS", "28")),
             article_url_regex=regex,
             max_keywords_per_article=int(_get("MAX_KEYWORDS_PER_ARTICLE", "0")),
