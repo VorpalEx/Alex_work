@@ -68,8 +68,16 @@ class Config:
                 "GOOGLE_APPLICATION_CREDENTIALS (chemin du fichier JSON)."
             )
 
-        regex_raw = _get("ARTICLE_URL_REGEX", "") or ""
-        regex = re.compile(regex_raw, re.IGNORECASE) if regex_raw.strip() else None
+        # Pages d'articles Dillygence = /news/, /blog/, /use-case(s)/.
+        # - non défini ou vide  -> filtre par défaut ci-dessous
+        # - "all" / "*"         -> tout inclure (aucun filtre)
+        # - toute autre valeur  -> regex personnalisée
+        default_regex = r"/(news|blog|use-cases?)(/|$)"
+        regex_raw = (_get("ARTICLE_URL_REGEX") or "").strip() or default_regex
+        if regex_raw.lower() in ("all", "*", ".*"):
+            regex = None
+        else:
+            regex = re.compile(regex_raw, re.IGNORECASE)
 
         return cls(
             google_credentials_path=cred_path,
