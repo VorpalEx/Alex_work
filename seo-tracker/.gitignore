@@ -1,0 +1,13 @@
+# Secrets — ne JAMAIS commit
+.env
+service-account.json
+*.json.key
+credentials*.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
