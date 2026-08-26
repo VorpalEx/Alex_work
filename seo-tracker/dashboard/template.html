@@ -317,7 +317,9 @@
   const pos = n=>n.toLocaleString("fr-FR",{minimumFractionDigits:1,maximumFractionDigits:1});
   const esc = s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const dash = '<span style="color:var(--muted)">—</span>';
-  const posPill = p=>{ if(!p||p<=0) return dash; const c=p<=3?"p-good":p<=10?"p-warn":p<=20?"p-ser":"p-crit"; return `<span class="pill ${c} tnum">${pos(p)}</span>`;};
+  const pageOf = p => Math.max(1, Math.ceil(p/10));
+  const posPill = p=>{ if(!p||p<=0) return dash; const c=p<=3?"p-good":p<=10?"p-warn":p<=20?"p-ser":"p-crit";
+    return `<span class="pill ${c} tnum" title="Position moyenne ${pos(p)} · page ${pageOf(p)}">P${pageOf(p)}&nbsp;·&nbsp;${pos(p)}</span>`;};
   const pctCell = v=>(!v||v<=0)?dash:pct(v);
   const sectionOf = p => p.includes("/news")?"News" : p.includes("/use-case")?"Use case" : p.includes("/blog")?"Blog" : "Autre";
   const sectClass = s => s==="News"?"news" : s==="Use case"?"usecase" : "blog";
