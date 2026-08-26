@@ -1,8 +1,8 @@
 name: Framer Probe
 
-# Découvre la structure réelle de tes collections Framer (IDs, champs des items).
-# À lancer manuellement une fois pour finaliser la config Framer.
-# Regarde le résultat dans les logs du run (étape "Sonder l'API Framer").
+# Découvre la structure réelle de tes collections Framer (noms, IDs, champs des items)
+# via le SDK officiel `framer-api`. À lancer manuellement une fois.
+# Regarde le résultat dans les logs du run (étape "Sonder Framer").
 
 on:
   workflow_dispatch: {}
@@ -12,18 +12,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-node@v4
         with:
-          python-version: "3.12"
+          node-version: "22"
 
-      - name: Sonder l'API Framer
-        working-directory: seo-tracker
+      - name: Installer framer-api
+        working-directory: seo-tracker/framer
+        run: npm install
+
+      - name: Sonder Framer
+        working-directory: seo-tracker/framer
         env:
-          # Google requis par la config (valeurs bidon acceptées ici : on ne les utilise pas).
-          GOOGLE_APPLICATION_CREDENTIALS: "unused"
-          GSC_SITE_URL: "sc-domain:dillygence.com"
-          GA4_PROPERTY_ID: "0"
-          FRAMER_API_TOKEN: ${{ secrets.FRAMER_API_TOKEN }}
-          FRAMER_COLLECTIONS: ${{ vars.FRAMER_COLLECTIONS }}
-          FRAMER_BASE_URL: ${{ vars.FRAMER_BASE_URL }}
-        run: python -m seo_tracker.framer
+          FRAMER_PROJECT_URL: ${{ vars.FRAMER_PROJECT_URL }}
+          FRAMER_API_KEY: ${{ secrets.FRAMER_API_TOKEN }}
+        run: node probe.mjs

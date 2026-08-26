@@ -4,6 +4,10 @@ service-account.json
 *.json.key
 credentials*.json
 
+# Node / Framer
+node_modules/
+framer_inventory.json
+
 # Python
 __pycache__/
 *.py[cod]
