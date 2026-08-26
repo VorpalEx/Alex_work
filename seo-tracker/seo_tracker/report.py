@@ -13,6 +13,7 @@ from pathlib import Path
 
 from .config import Config, ConfigError
 from .dashboard import build_data, write_csv, write_dashboard
+from .framer import fetch_inventory_or_empty as _fetch_inventory
 from .ga4 import fetch_page_metrics
 from .google_auth import build_credentials
 from .gsc import fetch_keyword_rows
@@ -46,12 +47,15 @@ def run(out_dir: Path) -> int:
     page_metrics = fetch_page_metrics(credentials, config.ga4_property_id, start, end)
     log.info("  %d pages récupérées.", len(page_metrics))
 
+    inventory = _fetch_inventory(config, log)
+
     articles = merge(
         keyword_rows,
         page_metrics,
         url_regex=config.article_url_regex,
         min_impressions=config.min_impressions,
         max_keywords_per_article=config.max_keywords_per_article,
+        inventory=inventory,
     )
     total_keywords = sum(len(a.keywords) for a in articles)
     log.info("Fusion : %d articles, %d mots-clés.", len(articles), total_keywords)

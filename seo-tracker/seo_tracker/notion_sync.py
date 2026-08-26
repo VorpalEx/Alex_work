@@ -93,7 +93,7 @@ class NotionSync:
 
         for art in articles:
             props = {
-                "Article": _title(art.best_keyword or art.path),
+                "Article": _title(art.title or art.best_keyword or art.path),
                 "URL de l'article": {"url": art.url},
                 "Vues": _num(art.views),
                 "Temps moyen (s)": _num(art.avg_time_on_page),

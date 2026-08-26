@@ -42,6 +42,14 @@ class Config:
     notion_db_articles: str | None
     notion_db_keywords: str | None
 
+    # Framer (optionnel : source d'inventaire des articles)
+    framer_token: str | None
+    framer_base_url: str
+    site_base_url: str
+    framer_collections: dict[str, str]  # {collection_id: prefixe_url}
+    framer_slug_field: str
+    framer_title_field: str
+
     # Rapport
     lookback_days: int
     article_url_regex: re.Pattern | None
@@ -79,6 +87,14 @@ class Config:
         else:
             regex = re.compile(regex_raw, re.IGNORECASE)
 
+        # Framer : FRAMER_COLLECTIONS="collId1=/news,collId2=/blog,collId3=/use-case"
+        collections: dict[str, str] = {}
+        for pair in (_get("FRAMER_COLLECTIONS") or "").split(","):
+            pair = pair.strip()
+            if "=" in pair:
+                cid, prefix = pair.split("=", 1)
+                collections[cid.strip()] = "/" + prefix.strip().strip("/")
+
         return cls(
             google_credentials_path=cred_path,
             google_credentials_json=cred_json,
@@ -89,6 +105,12 @@ class Config:
             notion_token=_get("NOTION_TOKEN", required=require_notion),
             notion_db_articles=_get("NOTION_DB_ARTICLES", required=require_notion),
             notion_db_keywords=_get("NOTION_DB_KEYWORDS", required=require_notion),
+            framer_token=_get("FRAMER_API_TOKEN"),
+            framer_base_url=(_get("FRAMER_BASE_URL") or "https://api.framer.com/v1").rstrip("/"),
+            site_base_url=(_get("SITE_BASE_URL") or "https://dillygence.com").rstrip("/"),
+            framer_collections=collections,
+            framer_slug_field=_get("FRAMER_SLUG_FIELD") or "slug",
+            framer_title_field=_get("FRAMER_TITLE_FIELD") or "title",
             lookback_days=int(_get("LOOKBACK_DAYS", "28")),
             article_url_regex=regex,
             max_keywords_per_article=int(_get("MAX_KEYWORDS_PER_ARTICLE", "0")),

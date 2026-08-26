@@ -259,7 +259,9 @@
     {"title":"Constellium — Jumeau numérique d'atelier","path":"/use-case/constellium","url":"https://dillygence.com/use-case/constellium","clicks":187,"impressions":5900,"ctr":0.0317,"position":14.1,"views":268,"avg_time":102,"keyword_count":22},
     {"title":"Flux tirés et cadence flexible en robotique","path":"/blog/flux-tires-cadence-flexible","url":"https://dillygence.com/blog/flux-tires-cadence-flexible","clicks":143,"impressions":6100,"ctr":0.0234,"position":16.8,"views":210,"avg_time":76,"keyword_count":19},
     {"title":"Audit de performance industrielle : méthode","path":"/news/audit-performance-industrielle","url":"https://dillygence.com/news/audit-performance-industrielle","clicks":121,"impressions":4300,"ctr":0.0281,"position":13.5,"views":178,"avg_time":118,"keyword_count":17},
-    {"title":"Supply chain résiliente : leviers concrets","path":"/blog/supply-chain-resiliente","url":"https://dillygence.com/blog/supply-chain-resiliente","clicks":96,"impressions":3800,"ctr":0.0253,"position":18.2,"views":140,"avg_time":94,"keyword_count":15}
+    {"title":"Supply chain résiliente : leviers concrets","path":"/blog/supply-chain-resiliente","url":"https://dillygence.com/blog/supply-chain-resiliente","clicks":96,"impressions":3800,"ctr":0.0253,"position":18.2,"views":140,"avg_time":94,"keyword_count":15},
+    {"title":"OEE : mesurer le rendement de vos équipements","path":"/news/oee-rendement-equipements","url":"https://dillygence.com/news/oee-rendement-equipements","clicks":0,"impressions":0,"ctr":0,"position":0,"views":0,"avg_time":0,"keyword_count":0},
+    {"title":"Faurecia — Refonte du pilotage d'atelier","path":"/use-case/faurecia","url":"https://dillygence.com/use-case/faurecia","clicks":0,"impressions":0,"ctr":0,"position":0,"views":0,"avg_time":0,"keyword_count":0}
   ],
   "keywords": [
     {"kw":"liquid factory","path":"/news/liquid-factory","clicks":210,"impressions":3100,"ctr":0.0677,"position":2.1},
@@ -362,7 +364,9 @@
     <span class="bval tnum">${bySec[s]}</span></div>`).join("") || '<div class="empty" style="padding:10px">—</div>';
 
   /* ---- Position pill ---- */
-  const posPill = p=>{const c=p<=3?"p-good":p<=10?"p-warn":p<=20?"p-ser":"p-crit"; return `<span class="pill ${c} tnum">${pos(p)}</span>`;};
+  const dash = '<span style="color:var(--muted)">—</span>';
+  const posPill = p=>{ if(!p||p<=0) return dash; const c=p<=3?"p-good":p<=10?"p-warn":p<=20?"p-ser":"p-crit"; return `<span class="pill ${c} tnum">${pos(p)}</span>`;};
+  const pctCell = v=>(!v||v<=0)?dash:pct(v);
 
   /* ---- Generic sortable table ---- */
   function makeTable(headEl, bodyEl, cols, getRows, defSort){
@@ -386,7 +390,7 @@
     {k:"title",lbl:"Article",cell:a=>`<span class="cell-main"><span class="sect ${sectClass(a._section)}">${a._section}</span><a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.title)}</a><span class="cell-path">${esc(a.path)}</span></span>`},
     {k:"clicks",lbl:"Clics",cell:a=>fmt(a.clicks)},
     {k:"impressions",lbl:"Impr.",cell:a=>fmt(a.impressions)},
-    {k:"ctr",lbl:"CTR",cell:a=>pct(a.ctr)},
+    {k:"ctr",lbl:"CTR",cell:a=>pctCell(a.ctr)},
     {k:"position",lbl:"Position",cell:a=>posPill(a.position)},
     {k:"views",lbl:"Vues",cell:a=>fmt(a.views)},
     {k:"avg_time",lbl:"Tps moy.",cell:a=>secs(a.avg_time)},
@@ -408,7 +412,7 @@
     {k:"path",lbl:"Article",cell:w=>`<span class="cell-path" style="max-width:260px">${esc(pathTitle[w.path]||w.path)}</span>`},
     {k:"clicks",lbl:"Clics",cell:w=>fmt(w.clicks)},
     {k:"impressions",lbl:"Impr.",cell:w=>fmt(w.impressions)},
-    {k:"ctr",lbl:"CTR",cell:w=>pct(w.ctr)},
+    {k:"ctr",lbl:"CTR",cell:w=>pctCell(w.ctr)},
     {k:"position",lbl:"Position",cell:w=>posPill(w.position)}
   ];
   function kwRows(){const q=kwQuery.toLowerCase();

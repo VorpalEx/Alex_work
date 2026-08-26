@@ -25,6 +25,7 @@ class KeywordEntry:
 class ArticleSummary:
     url: str
     path: str
+    title: str = ""
     # GSC
     clicks: int = 0
     impressions: int = 0
@@ -54,11 +55,21 @@ def merge(
     url_regex: re.Pattern | None = None,
     min_impressions: int = 1,
     max_keywords_per_article: int = 0,
+    inventory: list | None = None,
 ) -> list[ArticleSummary]:
-    """Construit une liste d'ArticleSummary (avec leurs mots-clés) triée par clics."""
+    """Construit une liste d'ArticleSummary (avec leurs mots-clés) triée par clics.
+
+    `inventory` (optionnel) : liste d'objets ayant .path/.url/.title (ex. FramerArticle).
+    Chaque article de l'inventaire apparaît dans le résultat, même sans trafic
+    (métriques à 0). Fournit aussi le vrai titre des pages.
+    """
     # GA4 indexé par chemin normalisé.
     ga4_by_path: dict[str, PageMetrics] = {
         normalize_path(p): m for p, m in page_metrics.items()
+    }
+    # Inventaire indexé par chemin normalisé.
+    inv_by_path: dict[str, object] = {
+        normalize_path(a.path): a for a in (inventory or [])
     }
 
     grouped: dict[str, list[KeywordRow]] = defaultdict(list)
@@ -87,10 +98,12 @@ def merge(
 
         path = normalize_path(page_url)
         ga4 = ga4_by_path.get(path)
+        inv = inv_by_path.get(path)
 
         summary = ArticleSummary(
             url=page_url,
             path=path,
+            title=getattr(inv, "title", "") if inv else "",
             clicks=total_clicks,
             impressions=total_impr,
             ctr=(total_clicks / total_impr) if total_impr else 0.0,
@@ -113,6 +126,30 @@ def merge(
             ],
         )
         articles.append(summary)
+
+    # Ajoute les articles de l'inventaire sans trafic de recherche (métriques à 0).
+    seen = {a.path for a in articles}
+    for path, inv in inv_by_path.items():
+        if path in seen:
+            continue
+        ga4 = ga4_by_path.get(path)
+        articles.append(
+            ArticleSummary(
+                url=getattr(inv, "url", ""),
+                path=path,
+                title=getattr(inv, "title", ""),
+                clicks=0,
+                impressions=0,
+                ctr=0.0,
+                avg_position=0.0,
+                keyword_count=0,
+                best_keyword="",
+                views=ga4.views if ga4 else 0,
+                avg_time_on_page=ga4.avg_time_on_page if ga4 else 0.0,
+                conversions=ga4.conversions if ga4 else 0.0,
+                keywords=[],
+            )
+        )
 
     articles.sort(key=lambda a: a.clicks, reverse=True)
     return articles

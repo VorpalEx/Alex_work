@@ -35,7 +35,7 @@ def build_data(
     """Construit le dict JSON attendu par le template."""
     art_rows = [
         {
-            "title": a.best_keyword or a.path,
+            "title": a.title or a.best_keyword or a.path,
             "path": a.path,
             "url": a.url,
             "clicks": a.clicks,

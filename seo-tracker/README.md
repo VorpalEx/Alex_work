@@ -53,6 +53,26 @@ l'onglet *Actions → le run → Artifacts*. Il ne requiert que les secrets
 > Le dashboard et la synchro Notion partagent la même collecte de données : quand
 > les accès Notion seront prêts, active simplement le workflow *SEO Tracker*.
 
+## Inventaire complet des articles via Framer (optionnel mais recommandé)
+
+Google Search Console ne liste **que les pages ayant eu des impressions**. Pour
+voir **TOUS** les articles publiés (y compris ceux sans trafic — justement ceux
+à travailler), on utilise **Framer comme source d'inventaire** (Server API).
+
+1. Dans Framer : réglages du projet → génère un **token API** (plan payant requis).
+2. Trouve les **IDs de collections** et la structure des items :
+   ```bash
+   FRAMER_API_TOKEN=... python -m seo_tracker.framer
+   ```
+   (ou lance le workflow **Framer Probe** dans GitHub Actions et lis les logs).
+3. Renseigne `FRAMER_COLLECTIONS` avec le mapping `id=prefixe`, ex. :
+   `FRAMER_COLLECTIONS=col_news=/news,col_blog=/blog,col_cases=/use-case`
+4. Ajuste si besoin `FRAMER_SLUG_FIELD` / `FRAMER_TITLE_FIELD` selon tes champs.
+
+Résultat : chaque article de l'inventaire apparaît dans le dashboard/Notion, avec
+ses métriques GSC+GA4 (ou 0 s'il n'a pas encore de trafic) et son vrai titre.
+Sans token Framer, l'outil retombe sur le mode piloté par Search Console.
+
 ## Installation (à faire une fois)
 
 ### 1. Google Cloud — compte de service
