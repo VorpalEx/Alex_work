@@ -45,7 +45,6 @@
   .tnum{font-variant-numeric:tabular-nums}
   button{font-family:inherit}
 
-  /* ---------- Header (sticky) ---------- */
   header.top{position:sticky; top:0; z-index:20; background:color-mix(in srgb,var(--plane) 88%, transparent);
     backdrop-filter:blur(10px); border-bottom:1px solid var(--border)}
   .bar{max-width:1240px; margin:0 auto; padding:12px 22px; display:flex; align-items:center; gap:18px; flex-wrap:wrap}
@@ -62,17 +61,23 @@
   .tab[aria-selected="true"]{background:var(--surface); color:var(--ink); box-shadow:var(--shadow)}
   .tab[aria-selected="true"] .n{background:var(--accent); color:#fff}
   .spacer{flex:1}
-  .meta{display:flex; gap:7px; align-items:center; flex-wrap:wrap; justify-content:flex-end}
+  .meta{display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end}
+  .period-ctl{display:inline-flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border);
+    border-radius:999px; padding:6px 10px 6px 12px; box-shadow:var(--shadow)}
+  .period-ctl .dot{width:7px; height:7px; border-radius:50%; background:var(--good); flex:none}
+  .period-ctl select{appearance:none; -webkit-appearance:none; background:transparent; border:0; color:var(--ink);
+    font-family:inherit; font-size:12.5px; font-weight:600; cursor:pointer; padding-right:18px; outline:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a919c' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right center; background-size:13px}
+  .period-ctl select:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:4px}
+  .period-ctl select option{background:var(--surface); color:var(--ink)}
   .chip{display:inline-flex; align-items:center; gap:6px; background:var(--surface); border:1px solid var(--border);
     border-radius:999px; padding:6px 11px; font-size:12px; color:var(--ink-2)}
-  .chip b{color:var(--ink); font-weight:600}
-  .chip .dot{width:7px; height:7px; border-radius:50%; background:var(--good)}
   .icon-btn{cursor:pointer; background:var(--surface); border:1px solid var(--border); color:var(--ink-2);
     border-radius:999px; width:34px; height:34px; display:grid; place-items:center; flex:none}
   .icon-btn:hover{color:var(--ink); border-color:var(--border-strong)}
   .icon-btn svg{width:17px; height:17px}
 
-  /* ---------- Main ---------- */
   main{flex:1; max-width:1240px; width:100%; margin:0 auto; padding:20px 22px 12px}
   .view{display:none; animation:fade .25s ease}
   .view.active{display:block}
@@ -84,7 +89,6 @@
   .pnote{font-size:12px; color:var(--muted)}
   .pbody{padding:10px 18px 18px}
 
-  /* KPIs */
   .kpis{display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-bottom:14px}
   .kpi{background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:14px 15px; box-shadow:var(--shadow)}
   .kpi .lbl{font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:600}
@@ -95,16 +99,15 @@
 
   .cols{display:grid; grid-template-columns:1.5fr 1fr; gap:14px}
 
-  /* Bars */
   .bars{display:flex; flex-direction:column; gap:10px; margin-top:6px}
   .bar-row{display:grid; grid-template-columns:1fr auto; gap:4px; cursor:default}
   .bar-lbl{font-size:12.5px; color:var(--ink-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .bar-val{font-size:12.5px; font-weight:600}
   .bar-track{grid-column:1/-1; height:9px; background:var(--surface-2); border-radius:5px; overflow:hidden}
   .bar-fill{height:100%; border-radius:5px; background:linear-gradient(90deg,var(--accent),var(--accent-ink)); min-width:3px;
-    transition:width .8s cubic-bezier(.2,.7,.2,1)}
+    transition:width .7s cubic-bezier(.2,.7,.2,1)}
+  .muted-empty{color:var(--muted); font-size:12.5px; padding:8px 0}
 
-  /* Section breakdown */
   .breakdown{display:flex; flex-direction:column; gap:11px; margin-top:6px}
   .brk{display:grid; grid-template-columns:88px 1fr auto; align-items:center; gap:10px}
   .brk .tag{font-size:12.5px; font-weight:500}
@@ -112,8 +115,7 @@
   .brk .bfill{height:100%; border-radius:5px}
   .brk .bval{font-size:12.5px; font-weight:600; color:var(--ink-2)}
 
-  /* Segmented filter */
-  .seg{display:inline-flex; gap:3px; background:var(--surface-2); border:1px solid var(--border); padding:3px; border-radius:999px}
+  .seg{display:inline-flex; gap:3px; background:var(--surface-2); border:1px solid var(--border); padding:3px; border-radius:999px; flex-wrap:wrap}
   .seg button{cursor:pointer; border:0; background:transparent; color:var(--ink-2); padding:6px 13px; border-radius:999px; font-size:12.5px; font-weight:500}
   .seg button[aria-pressed="true"]{background:var(--surface); color:var(--ink); box-shadow:var(--shadow)}
 
@@ -125,7 +127,6 @@
   .search svg{position:absolute; left:12px; top:50%; transform:translateY(-50%); width:15px; height:15px; color:var(--muted)}
   .count-note{font-size:12.5px; color:var(--muted)}
 
-  /* Tables — scroll INSIDE the frame (no long page scroll) */
   .table-wrap{background:var(--surface); border:1px solid var(--border); border-radius:var(--r); box-shadow:var(--shadow);
     overflow:auto; max-height:calc(100vh - 250px)}
   table{width:100%; border-collapse:collapse; font-size:13px; min-width:660px}
@@ -155,7 +156,6 @@
   .pill.p-crit{color:var(--critical); background:var(--critical-weak)}
   .empty{padding:40px; text-align:center; color:var(--muted)}
 
-  /* Quick wins */
   .qw-top{display:flex; align-items:center; gap:16px; margin-bottom:14px; flex-wrap:wrap}
   .qw-num{font-family:"Bricolage Grotesque",sans-serif; font-size:44px; font-weight:700; color:var(--accent-ink); letter-spacing:-.02em; line-height:1}
   .qw-txt{font-size:13px; color:var(--ink-2); max-width:520px}
@@ -186,7 +186,11 @@
     </nav>
     <div class="spacer"></div>
     <div class="meta">
-      <span class="chip"><span class="dot"></span><b id="m-period">—</b></span>
+      <div class="period-ctl">
+        <span class="dot"></span>
+        <select id="period" aria-label="Choisir la période"></select>
+      </div>
+      <span class="chip" id="m-range">—</span>
       <button class="icon-btn" id="theme" title="Changer de thème" aria-label="Changer de thème">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
       </button>
@@ -195,7 +199,6 @@
 </header>
 
 <main>
-  <!-- VUE D'ENSEMBLE -->
   <section class="view active" id="view-overview">
     <div class="kpis" id="kpis"></div>
     <div class="cols">
@@ -210,7 +213,6 @@
     </div>
   </section>
 
-  <!-- ARTICLES -->
   <section class="view" id="view-articles">
     <div class="toolbar">
       <div class="seg" id="seg-section" role="group" aria-label="Filtrer par section"></div>
@@ -219,7 +221,6 @@
     <div class="table-wrap"><table><thead id="art-head"></thead><tbody id="art-body"></tbody></table></div>
   </section>
 
-  <!-- MOTS-CLÉS -->
   <section class="view" id="view-keywords">
     <div class="toolbar">
       <span class="count-note" id="kw-count"></span>
@@ -231,7 +232,6 @@
     <div class="table-wrap"><table><thead id="kw-head"></thead><tbody id="kw-body"></tbody></table></div>
   </section>
 
-  <!-- QUICK WINS -->
   <section class="view" id="view-quickwins">
     <div class="qw-top">
       <span class="qw-num" id="qw-num">0</span>
@@ -246,7 +246,7 @@
 
 <script id="seo-data" type="application/json">
 {
-  "meta": {"site":"dillygence.com","period":"28 juil. – 22 août 2026","updated":"25 août 2026","generated":"aperçu (données d'exemple)","demo":true},
+  "meta": {"site":"dillygence.com","updated":"25 août 2026","generated":"aperçu (données d'exemple)","demo":true},
   "articles": [
     {"title":"Liquid Factory : la fin des lignes dédiées ?","path":"/news/liquid-factory","url":"https://dillygence.com/news/liquid-factory","clicks":842,"impressions":18420,"ctr":0.0457,"position":4.2,"views":1210,"avg_time":132,"keyword_count":47},
     {"title":"Industrie 4.0 pour les PME industrielles","path":"/news/industrie-4-0-pme","url":"https://dillygence.com/news/industrie-4-0-pme","clicks":610,"impressions":22100,"ctr":0.0276,"position":6.8,"views":905,"avg_time":98,"keyword_count":63},
@@ -282,7 +282,7 @@
     {"kw":"excellence opérationnelle définition","path":"/news/excellence-operationnelle","clicks":72,"impressions":2500,"ctr":0.0288,"position":6.6},
     {"kw":"améliorer productivité atelier","path":"/news/excellence-operationnelle","clicks":54,"impressions":2200,"ctr":0.0245,"position":8.4},
     {"kw":"méthode lean six sigma","path":"/news/excellence-operationnelle","clicks":36,"impressions":1800,"ctr":0.0200,"position":9.9},
-    {"kw":"agorespace lean","path":"/use-case/agorespace","clicks":97,"impressions":2300,"ctr":0.0422,"position":6.1},
+    {"kw":"jumeau numérique usine","path":"/use-case/agorespace","clicks":97,"impressions":2300,"ctr":0.0422,"position":6.1},
     {"kw":"optimisation des opérations","path":"/use-case/agorespace","clicks":58,"impressions":1900,"ctr":0.0305,"position":7.7},
     {"kw":"cas client lean manufacturing","path":"/use-case/agorespace","clicks":31,"impressions":1400,"ctr":0.0221,"position":11.8},
     {"kw":"maintenance prédictive roi","path":"/news/maintenance-predictive","clicks":84,"impressions":2600,"ctr":0.0323,"position":7.2},
@@ -316,76 +316,108 @@
   const secs = n=>n>=60?Math.floor(n/60)+" min "+String(Math.round(n%60)).padStart(2,"0")+"s":Math.round(n)+"s";
   const pos = n=>n.toLocaleString("fr-FR",{minimumFractionDigits:1,maximumFractionDigits:1});
   const esc = s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const dash = '<span style="color:var(--muted)">—</span>';
+  const posPill = p=>{ if(!p||p<=0) return dash; const c=p<=3?"p-good":p<=10?"p-warn":p<=20?"p-ser":"p-crit"; return `<span class="pill ${c} tnum">${pos(p)}</span>`;};
+  const pctCell = v=>(!v||v<=0)?dash:pct(v);
+  const sectionOf = p => p.includes("/news")?"News" : p.includes("/use-case")?"Use case" : p.includes("/blog")?"Blog" : "Autre";
+  const sectClass = s => s==="News"?"news" : s==="Use case"?"usecase" : "blog";
 
   let DATA;
   try{ DATA = JSON.parse($("#seo-data").textContent); }
   catch(e){ document.body.innerHTML='<p style="padding:40px">Données invalides.</p>'; return; }
+  const meta = DATA.meta||{};
 
-  const arts = DATA.articles||[], kws = DATA.keywords||[], meta = DATA.meta||{};
-  const pathTitle = {}; arts.forEach(a=>pathTitle[a.path]=a.title);
+  // --- Construction des périodes -------------------------------------------
+  let periods, defaultKey;
+  if (Array.isArray(DATA.periods) && DATA.periods.length){
+    periods = DATA.periods;
+    defaultKey = DATA.default || periods[0].key;
+  } else {
+    // Démo : on synthétise des périodes en mettant à l'échelle l'échantillon.
+    const defs = [["7d","7 jours",0.28],["28d","28 jours",1],["3m","3 mois",2.7],["6m","6 mois",4.9],["12m","12 mois",8.6]];
+    const scaleArts = f => (DATA.articles||[]).map(a=>({...a, clicks:Math.round(a.clicks*f), impressions:Math.round(a.impressions*f), views:Math.round(a.views*f)}));
+    const scaleKws = f => (DATA.keywords||[]).map(k=>({...k, clicks:Math.round(k.clicks*f), impressions:Math.round(k.impressions*f)}));
+    periods = defs.map(([key,label,f])=>({key, label, period:"exemple", articles:scaleArts(f), keywords:scaleKws(f)}));
+    defaultKey = "28d";
+  }
 
-  const sectionOf = p => p.includes("/news")?"News" : p.includes("/use-case")?"Use case" : p.includes("/blog")?"Blog" : "Autre";
-  const sectClass = s => s==="News"?"news" : s==="Use case"?"usecase" : "blog";
-  arts.forEach(a=>a._section=sectionOf(a.path));
+  // --- État & courant ------------------------------------------------------
+  const tip = $("#tip");
+  let arts=[], kws=[], pathTitle={};
+  let state = {tab:"overview", sort:{}, secFilter:"Tout", kwQuery:""};
 
-  $("#m-period").textContent = meta.period||"—";
-  $("#n-art").textContent = arts.length;
-  $("#n-kw").textContent = kws.length;
-
-  /* ---- KPIs ---- */
-  const tot=(arr,k)=>arr.reduce((s,x)=>s+(x[k]||0),0);
-  const totClicks=tot(arts,"clicks"), totImpr=tot(arts,"impressions"), totViews=tot(arts,"views");
-  const wPos = totImpr?arts.reduce((s,a)=>s+a.position*a.impressions,0)/totImpr:0;
-  $("#kpis").innerHTML = [
-    {lbl:"Articles suivis", val:fmt(arts.length), sub:"pages positionnées", src:"GSC"},
-    {lbl:"Mots-clés", val:fmt(kws.length), sub:"requêtes positionnées", src:"GSC", accent:true},
-    {lbl:"Clics", val:fmt(totClicks), sub:"cumulés", src:"GSC"},
-    {lbl:"Impressions", val:fmt(totImpr), sub:"cumulées", src:"GSC"},
-    {lbl:"Position moy.", val:pos(wPos), sub:"pondérée impressions", src:"GSC"},
-    {lbl:"Vues", val:fmt(totViews), sub:"pages vues", src:"GA4"}
-  ].map(k=>`<div class="kpi${k.accent?' accent':''}"><div class="lbl">${k.lbl}</div>
-    <div class="val tnum">${k.val}</div><div class="sub">${k.sub}</div><div class="src">${k.src}</div></div>`).join("");
-
-  /* ---- Bars ---- */
-  const top=[...arts].sort((a,b)=>b.clicks-a.clicks).slice(0,10);
-  const maxC=Math.max(...top.map(a=>a.clicks),1);
-  $("#bars-note").textContent = top.length+" premiers";
-  $("#bars").innerHTML = top.map(a=>`<div class="bar-row" data-kw="${esc(a.title)}" data-val="${fmt(a.clicks)} clics · ${fmt(a.impressions)} impr. · pos. ${pos(a.position)}">
-    <span class="bar-lbl">${esc(a.title)}</span><span class="bar-val tnum">${fmt(a.clicks)}</span>
-    <span class="bar-track"><span class="bar-fill" style="width:0"></span></span></div>`).join("");
-  requestAnimationFrame(()=>$$(".bar-row",$("#bars")).forEach((r,i)=>r.querySelector(".bar-fill").style.width=(top[i].clicks/maxC*100)+"%"));
-
-  /* ---- Breakdown by section ---- */
-  const secColors={News:"var(--accent)","Use case":"var(--good)",Blog:"var(--serious)"};
-  const bySec={}; arts.forEach(a=>{bySec[a._section]=(bySec[a._section]||0)+1;});
-  const maxS=Math.max(...Object.values(bySec),1);
-  $("#breakdown").innerHTML = Object.keys(secColors).filter(s=>bySec[s]).map(s=>`<div class="brk">
-    <span class="tag">${s}</span><span class="btrack"><span class="bfill" style="width:${bySec[s]/maxS*100}%;background:${secColors[s]}"></span></span>
-    <span class="bval tnum">${bySec[s]}</span></div>`).join("") || '<div class="empty" style="padding:10px">—</div>';
-
-  /* ---- Position pill ---- */
-  const dash = '<span style="color:var(--muted)">—</span>';
-  const posPill = p=>{ if(!p||p<=0) return dash; const c=p<=3?"p-good":p<=10?"p-warn":p<=20?"p-ser":"p-crit"; return `<span class="pill ${c} tnum">${pos(p)}</span>`;};
-  const pctCell = v=>(!v||v<=0)?dash:pct(v);
-
-  /* ---- Generic sortable table ---- */
-  function makeTable(headEl, bodyEl, cols, getRows, defSort){
-    let sort=defSort.k, dir=defSort.dir;
+  function makeTable(headEl, bodyEl, cols, getRows, defSort, key){
+    if(!state.sort[key]) state.sort[key] = {k:defSort.k, dir:defSort.dir};
     function draw(){
-      let rows=getRows();
-      rows.sort((a,b)=>{const va=a[sort],vb=b[sort];
-        return typeof va==="string"?dir*va.localeCompare(vb,"fr"):dir*((va||0)-(vb||0));});
-      headEl.innerHTML="<tr>"+cols.map(c=>`<th data-k="${c.k}">${c.lbl}${c.k===sort?`<span class="ar">${dir<0?"▼":"▲"}</span>`:""}</th>`).join("")+"</tr>";
+      const s = state.sort[key];
+      let rows = getRows();
+      rows.sort((a,b)=>{const va=a[s.k],vb=b[s.k];
+        return typeof va==="string"?s.dir*va.localeCompare(vb,"fr"):s.dir*((va||0)-(vb||0));});
+      headEl.innerHTML="<tr>"+cols.map(c=>`<th data-k="${c.k}">${c.lbl}${c.k===s.k?`<span class="ar">${s.dir<0?"▼":"▲"}</span>`:""}</th>`).join("")+"</tr>";
       bodyEl.innerHTML = rows.length?rows.map(r=>"<tr>"+cols.map(c=>`<td>${c.cell(r)}</td>`).join("")+"</tr>").join("")
         :`<tr><td colspan="${cols.length}"><div class="empty">Aucun résultat.</div></td></tr>`;
       $$("th",headEl).forEach(th=>th.onclick=()=>{const k=th.dataset.k;
-        if(sort===k)dir*=-1; else {sort=k; dir=(k==="kw"||k==="title"||k==="path")?1:-1;} draw();});
+        if(s.k===k)s.dir*=-1; else {s.k=k; s.dir=(k==="kw"||k==="title"||k==="path")?1:-1;} draw();});
     }
     return draw;
   }
 
-  /* ---- Articles table ---- */
-  let secFilter="Tout";
+  let drawArts, drawKw, drawQw, drawn={};
+
+  function renderStatic(){
+    // KPIs
+    const tot=(k)=>arts.reduce((s,x)=>s+(x[k]||0),0);
+    const totClicks=tot("clicks"), totImpr=tot("impressions"), totViews=tot("views");
+    const wPos = totImpr?arts.reduce((s,a)=>s+a.position*a.impressions,0)/totImpr:0;
+    $("#kpis").innerHTML = [
+      {lbl:"Articles suivis", val:fmt(arts.length), sub:"pages positionnées", src:"GSC"},
+      {lbl:"Mots-clés", val:fmt(kws.length), sub:"requêtes positionnées", src:"GSC", accent:true},
+      {lbl:"Clics", val:fmt(totClicks), sub:"cumulés", src:"GSC"},
+      {lbl:"Impressions", val:fmt(totImpr), sub:"cumulées", src:"GSC"},
+      {lbl:"Position moy.", val:wPos?pos(wPos):"—", sub:"pondérée impressions", src:"GSC"},
+      {lbl:"Vues", val:fmt(totViews), sub:"pages vues", src:"GA4"}
+    ].map(k=>`<div class="kpi${k.accent?' accent':''}"><div class="lbl">${k.lbl}</div>
+      <div class="val tnum">${k.val}</div><div class="sub">${k.sub}</div><div class="src">${k.src}</div></div>`).join("");
+
+    // Bars
+    const top=[...arts].filter(a=>a.clicks>0).sort((a,b)=>b.clicks-a.clicks).slice(0,10);
+    const maxC=Math.max(...top.map(a=>a.clicks),1);
+    $("#bars-note").textContent = top.length?top.length+" premiers":"";
+    $("#bars").innerHTML = top.length ? top.map(a=>`<div class="bar-row" data-kw="${esc(a.title)}" data-val="${fmt(a.clicks)} clics · ${fmt(a.impressions)} impr. · pos. ${pos(a.position)}">
+        <span class="bar-lbl">${esc(a.title)}</span><span class="bar-val tnum">${fmt(a.clicks)}</span>
+        <span class="bar-track"><span class="bar-fill" style="width:0"></span></span></div>`).join("")
+      : '<div class="muted-empty">Aucun clic sur cette période pour le moment.</div>';
+    requestAnimationFrame(()=>$$(".bar-row",$("#bars")).forEach((r,i)=>r.querySelector(".bar-fill").style.width=(top[i].clicks/maxC*100)+"%"));
+    $$(".bar-row").forEach(r=>{
+      r.addEventListener("mousemove",e=>{tip.querySelector(".t-kw").textContent=r.dataset.kw;
+        tip.querySelector(".t-val").textContent=r.dataset.val; tip.style.opacity=1;
+        tip.style.left=Math.min(e.clientX+14,innerWidth-290)+"px"; tip.style.top=(e.clientY+14)+"px";});
+      r.addEventListener("mouseleave",()=>tip.style.opacity=0);
+    });
+
+    // Breakdown
+    const secColors={News:"var(--accent)","Use case":"var(--good)",Blog:"var(--serious)"};
+    const bySec={}; arts.forEach(a=>{bySec[a._section]=(bySec[a._section]||0)+1;});
+    const maxS=Math.max(...Object.values(bySec),1);
+    $("#breakdown").innerHTML = Object.keys(secColors).filter(s=>bySec[s]).map(s=>`<div class="brk">
+      <span class="tag">${s}</span><span class="btrack"><span class="bfill" style="width:${bySec[s]/maxS*100}%;background:${secColors[s]}"></span></span>
+      <span class="bval tnum">${bySec[s]}</span></div>`).join("") || '<div class="muted-empty">—</div>';
+
+    // Section filter
+    const present=["Tout",...Object.keys(secColors).filter(s=>bySec[s])];
+    $("#seg-section").innerHTML=present.map(s=>`<button data-s="${s}" aria-pressed="${s===state.secFilter}">${s}</button>`).join("");
+    if(!present.includes(state.secFilter)) state.secFilter="Tout";
+    $$("#seg-section button").forEach(b=>b.onclick=()=>{state.secFilter=b.dataset.s;
+      $$("#seg-section button").forEach(x=>x.setAttribute("aria-pressed",x===b)); updArtCount(); drawArts&&drawArts();});
+    updArtCount();
+
+    // Quick wins header
+    const wins=kws.filter(k=>k.position>=5&&k.position<=15);
+    $("#n-qw").textContent=wins.length; $("#qw-num").textContent=wins.length;
+  }
+
+  function updArtCount(){const n=arts.filter(a=>state.secFilter==="Tout"||a._section===state.secFilter).length; $("#art-count").textContent=`${n} article${n>1?"s":""}`;}
+
   const artCols=[
     {k:"title",lbl:"Article",cell:a=>`<span class="cell-main"><span class="sect ${sectClass(a._section)}">${a._section}</span><a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.title)}</a><span class="cell-path">${esc(a.path)}</span></span>`},
     {k:"clicks",lbl:"Clics",cell:a=>fmt(a.clicks)},
@@ -393,20 +425,9 @@
     {k:"ctr",lbl:"CTR",cell:a=>pctCell(a.ctr)},
     {k:"position",lbl:"Position",cell:a=>posPill(a.position)},
     {k:"views",lbl:"Vues",cell:a=>fmt(a.views)},
-    {k:"avg_time",lbl:"Tps moy.",cell:a=>secs(a.avg_time)},
+    {k:"avg_time",lbl:"Tps moy.",cell:a=>a.avg_time>0?secs(a.avg_time):dash},
     {k:"keyword_count",lbl:"Mots-clés",cell:a=>fmt(a.keyword_count)}
   ];
-  const drawArts = makeTable($("#art-head"),$("#art-body"),artCols,
-    ()=>arts.filter(a=>secFilter==="Tout"||a._section===secFilter),{k:"clicks",dir:-1});
-  const secs_present=["Tout",...Object.keys(secColors).filter(s=>bySec[s])];
-  $("#seg-section").innerHTML=secs_present.map(s=>`<button data-s="${s}" aria-pressed="${s==="Tout"}">${s}</button>`).join("");
-  function updArtCount(){const n=arts.filter(a=>secFilter==="Tout"||a._section===secFilter).length; $("#art-count").textContent=`${n} article${n>1?"s":""}`;}
-  $$("#seg-section button").forEach(b=>b.onclick=()=>{secFilter=b.dataset.s;
-    $$("#seg-section button").forEach(x=>x.setAttribute("aria-pressed",x===b)); updArtCount(); drawArts();});
-  updArtCount();
-
-  /* ---- Keywords table ---- */
-  let kwQuery="";
   const kwCols=[
     {k:"kw",lbl:"Mot-clé",cell:w=>`<span class="cell-main">${esc(w.kw)}</span>`},
     {k:"path",lbl:"Article",cell:w=>`<span class="cell-path" style="max-width:260px">${esc(pathTitle[w.path]||w.path)}</span>`},
@@ -415,54 +436,68 @@
     {k:"ctr",lbl:"CTR",cell:w=>pctCell(w.ctr)},
     {k:"position",lbl:"Position",cell:w=>posPill(w.position)}
   ];
-  function kwRows(){const q=kwQuery.toLowerCase();
-    const r=q?kws.filter(w=>w.kw.toLowerCase().includes(q)||(pathTitle[w.path]||w.path).toLowerCase().includes(q)):[...kws];
-    $("#kw-count").textContent=`${r.length} mot${r.length>1?"s":""}-clé${r.length>1?"s":""}`; return r;}
-  const drawKw = makeTable($("#kw-head"),$("#kw-body"),kwCols,kwRows,{k:"clicks",dir:-1});
-  $("#search").addEventListener("input",e=>{kwQuery=e.target.value; drawKw();});
-
-  /* ---- Quick wins ---- */
-  const wins=kws.filter(k=>k.position>=5&&k.position<=15);
-  $("#n-qw").textContent=wins.length; $("#qw-num").textContent=wins.length;
   const qwCols=[
     {k:"kw",lbl:"Mot-clé",cell:w=>`<span class="cell-main">${esc(w.kw)}</span>`},
     {k:"path",lbl:"Article",cell:w=>`<span class="cell-path" style="max-width:240px">${esc(pathTitle[w.path]||w.path)}</span>`},
     {k:"position",lbl:"Position",cell:w=>posPill(w.position)},
     {k:"impressions",lbl:"Impr.",cell:w=>fmt(w.impressions)},
     {k:"clicks",lbl:"Clics",cell:w=>fmt(w.clicks)},
-    {k:"ctr",lbl:"CTR",cell:w=>pct(w.ctr)}
+    {k:"ctr",lbl:"CTR",cell:w=>pctCell(w.ctr)}
   ];
-  const drawQw = makeTable($("#qw-head"),$("#qw-body"),qwCols,()=>[...wins],{k:"impressions",dir:-1});
 
-  /* ---- Tabs ---- */
-  const drawn={overview:true};
-  const drawers={articles:drawArts,keywords:drawKw,quickwins:drawQw};
+  function buildDrawers(){
+    drawArts = makeTable($("#art-head"),$("#art-body"),artCols,
+      ()=>arts.filter(a=>state.secFilter==="Tout"||a._section===state.secFilter),{k:"clicks",dir:-1},"articles");
+    drawKw = makeTable($("#kw-head"),$("#kw-body"),kwCols,()=>{
+      const q=state.kwQuery.toLowerCase();
+      const r=q?kws.filter(w=>w.kw.toLowerCase().includes(q)||(pathTitle[w.path]||w.path).toLowerCase().includes(q)):[...kws];
+      $("#kw-count").textContent=`${r.length} mot${r.length>1?"s":""}-clé${r.length>1?"s":""}`; return r;
+    },{k:"clicks",dir:-1},"keywords");
+    drawQw = makeTable($("#qw-head"),$("#qw-body"),qwCols,
+      ()=>kws.filter(k=>k.position>=5&&k.position<=15),{k:"impressions",dir:-1},"quickwins");
+  }
+
+  // --- Application d'une période -------------------------------------------
+  function apply(key){
+    const p = periods.find(x=>x.key===key) || periods[0];
+    arts = (p.articles||[]).map(a=>({...a})); arts.forEach(a=>a._section=sectionOf(a.path));
+    kws = (p.keywords||[]).map(k=>({...k}));
+    pathTitle={}; arts.forEach(a=>pathTitle[a.path]=a.title);
+    $("#m-range").textContent = p.period || p.label || "";
+    $("#n-art").textContent = arts.length;
+    $("#n-kw").textContent = kws.length;
+    renderStatic();
+    buildDrawers();
+    drawn = {overview:true};
+    const drawers = {articles:drawArts, keywords:drawKw, quickwins:drawQw};
+    if(drawers[state.tab]){ drawers[state.tab](); drawn[state.tab]=true; }
+  }
+
+  // --- Init sélecteur, onglets, thème --------------------------------------
+  $("#period").innerHTML = periods.map(p=>`<option value="${p.key}">${esc(p.label)}</option>`).join("");
+  $("#period").value = defaultKey;
+  $("#period").addEventListener("change", e=>apply(e.target.value));
+
   $$(".tab").forEach(t=>t.onclick=()=>{
     const v=t.dataset.view;
     $$(".tab").forEach(x=>x.setAttribute("aria-selected",x===t));
     $$(".view").forEach(s=>s.classList.toggle("active",s.id==="view-"+v));
+    state.tab=v;
+    const drawers={articles:drawArts, keywords:drawKw, quickwins:drawQw};
     if(!drawn[v] && drawers[v]){ drawers[v](); drawn[v]=true; }
     window.scrollTo({top:0});
   });
+  $("#search").addEventListener("input",e=>{state.kwQuery=e.target.value; drawKw&&drawKw();});
 
-  /* ---- Chart tooltip ---- */
-  const tip=$("#tip");
-  $$(".bar-row").forEach(r=>{
-    r.addEventListener("mousemove",e=>{tip.querySelector(".t-kw").textContent=r.dataset.kw;
-      tip.querySelector(".t-val").textContent=r.dataset.val; tip.style.opacity=1;
-      tip.style.left=Math.min(e.clientX+14,innerWidth-290)+"px"; tip.style.top=(e.clientY+14)+"px";});
-    r.addEventListener("mouseleave",()=>tip.style.opacity=0);
-  });
-
-  /* ---- Theme ---- */
   $("#theme").onclick=()=>{const cur=document.documentElement.getAttribute("data-theme");
     const dark=cur?cur==="dark":matchMedia("(prefers-color-scheme:dark)").matches;
     document.documentElement.setAttribute("data-theme",dark?"light":"dark");};
 
-  /* ---- Footer ---- */
   $("#footer").innerHTML = `<b>${meta.demo?"Aperçu — données d'exemple.":"Données réelles."}</b>
-    ${meta.demo?"Le rendu illustre l'outil ; une fois les accès Google branchés, il affichera les vraies données (sections /news, /blog, /use-case de dillygence.com).":""}
-    Mots-clés, positions, clics et impressions : <b>Google Search Console</b> · vues et temps passé : <b>GA4</b> · jointure par URL · position pondérée par impressions.
-    ${meta.period?` Période : ${esc(meta.period)}.`:""}`;
+    ${meta.demo?"Le sélecteur de période fonctionne (valeurs mises à l'échelle pour la démo) ; avec tes vraies données, chaque période est calculée exactement.":""}
+    Mots-clés, positions, clics et impressions : <b>Google Search Console</b> · vues et temps passé : <b>GA4</b> · position pondérée par impressions.
+    ${meta.updated?` Dernière mise à jour : ${esc(meta.updated)}.`:""}`;
+
+  apply(defaultKey);
 })();
 </script>
