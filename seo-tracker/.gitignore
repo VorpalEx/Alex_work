@@ -8,6 +8,10 @@ credentials*.json
 node_modules/
 framer_inventory.json
 
+# Dashboards générés avec de vraies données (ne jamais committer sur repo public)
+dashboard/live.html
+out/
+
 # Python
 __pycache__/
 *.py[cod]

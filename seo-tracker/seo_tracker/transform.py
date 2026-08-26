@@ -67,10 +67,13 @@ def merge(
     ga4_by_path: dict[str, PageMetrics] = {
         normalize_path(p): m for p, m in page_metrics.items()
     }
-    # Inventaire indexé par chemin normalisé.
-    inv_by_path: dict[str, object] = {
-        normalize_path(a.path): a for a in (inventory or [])
-    }
+    # Inventaire indexé par chemin normalisé — y compris les alias (slugs FR/EN),
+    # pour que la jointure GSC/GA4 fonctionne quel que soit le slug live.
+    inv_by_path: dict[str, object] = {}
+    for a in inventory or []:
+        for p in [a.path, *getattr(a, "alt_paths", [])]:
+            if p:
+                inv_by_path.setdefault(normalize_path(p), a)
 
     grouped: dict[str, list[KeywordRow]] = defaultdict(list)
     for row in keyword_rows:
@@ -128,11 +131,16 @@ def merge(
         articles.append(summary)
 
     # Ajoute les articles de l'inventaire sans trafic de recherche (métriques à 0).
+    # Dédup par identité d'article : on saute si l'un de ses chemins candidats a
+    # déjà été produit via GSC.
     seen = {a.path for a in articles}
-    for path, inv in inv_by_path.items():
-        if path in seen:
+    for inv in inventory or []:
+        candidates = [normalize_path(p) for p in [inv.path, *getattr(inv, "alt_paths", [])] if p]
+        if any(c in seen for c in candidates):
             continue
-        ga4 = ga4_by_path.get(path)
+        path = normalize_path(inv.path)
+        seen.add(path)
+        ga4 = next((ga4_by_path[c] for c in candidates if c in ga4_by_path), None)
         articles.append(
             ArticleSummary(
                 url=getattr(inv, "url", ""),
