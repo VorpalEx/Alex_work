@@ -160,6 +160,22 @@
   .qw-num{font-family:"Bricolage Grotesque",sans-serif; font-size:44px; font-weight:700; color:var(--accent-ink); letter-spacing:-.02em; line-height:1}
   .qw-txt{font-size:13px; color:var(--ink-2); max-width:520px}
 
+  /* Lien vers la fiche article */
+  .art-link{color:var(--ink); text-decoration:none; cursor:pointer; border-bottom:1px dotted var(--border-strong)}
+  .art-link:hover{color:var(--accent); border-bottom-color:var(--accent)}
+  .ext{margin-left:6px; color:var(--muted); text-decoration:none; font-size:11px}
+  .ext:hover{color:var(--accent)}
+
+  /* Fiche article (vue détail) */
+  .back{cursor:pointer; background:var(--surface); border:1px solid var(--border); color:var(--ink-2);
+    border-radius:999px; padding:7px 14px 7px 11px; font-size:12.5px; font-weight:500; display:inline-flex; gap:6px; align-items:center; margin-bottom:14px}
+  .back:hover{color:var(--ink); border-color:var(--border-strong)}
+  .detail-hero{display:flex; flex-direction:column; gap:6px; margin-bottom:16px}
+  .detail-hero h2{font-size:22px; font-weight:700}
+  .detail-hero .d-url{font-size:12.5px; color:var(--muted); text-decoration:none; word-break:break-all; width:fit-content}
+  .detail-hero .d-url:hover{color:var(--accent)}
+  .detail-hero .row{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+
   footer{max-width:1240px; margin:0 auto; padding:10px 22px 22px; color:var(--muted); font-size:11.5px; line-height:1.6}
   footer b{color:var(--ink-2); font-weight:600}
 
@@ -238,6 +254,21 @@
       <span class="qw-txt"><b style="color:var(--ink)">Mots-clés en position 5–15.</b> À un cheveu du top&nbsp;4 : optimiser ces pages (titre, contenu, maillage) donne les gains les plus rapides. Triés par impressions = potentiel de trafic.</span>
     </div>
     <div class="table-wrap"><table><thead id="qw-head"></thead><tbody id="qw-body"></tbody></table></div>
+  </section>
+
+  <section class="view" id="view-detail">
+    <button class="back" id="detail-back">← Retour aux articles</button>
+    <div class="detail-hero">
+      <div class="row"><span class="sect" id="d-sect"></span><h2 id="d-title"></h2></div>
+      <a class="d-url" id="d-url" target="_blank" rel="noopener"></a>
+    </div>
+    <div class="kpis" id="d-kpis"></div>
+    <div class="panel">
+      <div class="phead"><h2>Mots-clés de cet article</h2><span class="pnote" id="d-kwnote"></span></div>
+      <div class="pbody" style="padding-top:4px">
+        <div class="table-wrap" style="box-shadow:none; border:0"><table><thead id="d-head"></thead><tbody id="d-body"></tbody></table></div>
+      </div>
+    </div>
   </section>
 </main>
 
@@ -346,7 +377,7 @@
   // --- État & courant ------------------------------------------------------
   const tip = $("#tip");
   let arts=[], kws=[], pathTitle={};
-  let state = {tab:"overview", sort:{}, secFilter:"Tout", kwQuery:""};
+  let state = {tab:"overview", sort:{}, secFilter:"Tout", kwQuery:"", detail:null};
 
   function makeTable(headEl, bodyEl, cols, getRows, defSort, key){
     if(!state.sort[key]) state.sort[key] = {k:defSort.k, dir:defSort.dir};
@@ -421,7 +452,7 @@
   function updArtCount(){const n=arts.filter(a=>state.secFilter==="Tout"||a._section===state.secFilter).length; $("#art-count").textContent=`${n} article${n>1?"s":""}`;}
 
   const artCols=[
-    {k:"title",lbl:"Article",cell:a=>`<span class="cell-main"><span class="sect ${sectClass(a._section)}">${a._section}</span><a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.title)}</a><span class="cell-path">${esc(a.path)}</span></span>`},
+    {k:"title",lbl:"Article",cell:a=>`<span class="cell-main"><span class="sect ${sectClass(a._section)}">${a._section}</span><a class="art-link" data-article="${esc(a.path)}">${esc(a.title)}</a><a class="ext" href="${esc(a.url)}" target="_blank" rel="noopener" title="Voir la page en ligne">↗</a><span class="cell-path">${esc(a.path)}</span></span>`},
     {k:"clicks",lbl:"Clics",cell:a=>fmt(a.clicks)},
     {k:"impressions",lbl:"Impr.",cell:a=>fmt(a.impressions)},
     {k:"ctr",lbl:"CTR",cell:a=>pctCell(a.ctr)},
@@ -432,7 +463,7 @@
   ];
   const kwCols=[
     {k:"kw",lbl:"Mot-clé",cell:w=>`<span class="cell-main">${esc(w.kw)}</span>`},
-    {k:"path",lbl:"Article",cell:w=>`<span class="cell-path" style="max-width:260px">${esc(pathTitle[w.path]||w.path)}</span>`},
+    {k:"path",lbl:"Article",cell:w=>`<a class="art-link cell-path" style="max-width:260px" data-article="${esc(w.path)}">${esc(pathTitle[w.path]||w.path)}</a>`},
     {k:"clicks",lbl:"Clics",cell:w=>fmt(w.clicks)},
     {k:"impressions",lbl:"Impr.",cell:w=>fmt(w.impressions)},
     {k:"ctr",lbl:"CTR",cell:w=>pctCell(w.ctr)},
@@ -440,12 +471,45 @@
   ];
   const qwCols=[
     {k:"kw",lbl:"Mot-clé",cell:w=>`<span class="cell-main">${esc(w.kw)}</span>`},
-    {k:"path",lbl:"Article",cell:w=>`<span class="cell-path" style="max-width:240px">${esc(pathTitle[w.path]||w.path)}</span>`},
+    {k:"path",lbl:"Article",cell:w=>`<a class="art-link cell-path" style="max-width:240px" data-article="${esc(w.path)}">${esc(pathTitle[w.path]||w.path)}</a>`},
     {k:"position",lbl:"Position",cell:w=>posPill(w.position)},
     {k:"impressions",lbl:"Impr.",cell:w=>fmt(w.impressions)},
     {k:"clicks",lbl:"Clics",cell:w=>fmt(w.clicks)},
     {k:"ctr",lbl:"CTR",cell:w=>pctCell(w.ctr)}
   ];
+  const detailKwCols=[
+    {k:"kw",lbl:"Mot-clé",cell:w=>`<span class="cell-main">${esc(w.kw)}</span>`},
+    {k:"position",lbl:"Position",cell:w=>posPill(w.position)},
+    {k:"impressions",lbl:"Impr.",cell:w=>fmt(w.impressions)},
+    {k:"clicks",lbl:"Clics",cell:w=>fmt(w.clicks)},
+    {k:"ctr",lbl:"CTR",cell:w=>pctCell(w.ctr)}
+  ];
+
+  function openDetail(path){
+    const a = arts.find(x=>x.path===path);
+    if(!a) return;
+    state.detail = path;
+    $("#d-sect").className = "sect "+sectClass(a._section);
+    $("#d-sect").textContent = a._section;
+    $("#d-title").textContent = a.title;
+    $("#d-url").href = a.url; $("#d-url").textContent = a.url;
+    $("#d-kpis").innerHTML = [
+      {lbl:"Position moy.", val: a.position>0?`P${pageOf(a.position)} · ${pos(a.position)}`:"—", accent:true},
+      {lbl:"Clics", val: fmt(a.clicks)},
+      {lbl:"Impressions", val: fmt(a.impressions)},
+      {lbl:"CTR", val: a.ctr>0?pct(a.ctr):"—"},
+      {lbl:"Vues", val: fmt(a.views), src:"GA4"},
+      {lbl:"Temps moyen", val: a.avg_time>0?secs(a.avg_time):"—", src:"GA4"}
+    ].map(k=>`<div class="kpi${k.accent?' accent':''}"><div class="lbl">${k.lbl}</div>
+      <div class="val tnum">${k.val}</div><div class="src">${k.src||"GSC"}</div></div>`).join("");
+    const n = kws.filter(k=>k.path===path).length;
+    $("#d-kwnote").textContent = n?`${n} mot${n>1?"s":""}-clé${n>1?"s":""} positionné${n>1?"s":""}`:"aucun mot-clé positionné sur la période";
+    const draw = makeTable($("#d-head"),$("#d-body"),detailKwCols,()=>kws.filter(k=>k.path===path),{k:"impressions",dir:-1},"detail");
+    draw();
+    $$(".view").forEach(s=>s.classList.toggle("active",s.id==="view-detail"));
+    $$(".tab").forEach(x=>x.setAttribute("aria-selected",false));
+    window.scrollTo({top:0});
+  }
 
   function buildDrawers(){
     drawArts = makeTable($("#art-head"),$("#art-body"),artCols,
@@ -471,6 +535,9 @@
     renderStatic();
     buildDrawers();
     drawn = {overview:true};
+    // Si on est sur une fiche article, on la ré-affiche avec les données de la période.
+    if(state.detail && arts.some(a=>a.path===state.detail)){ openDetail(state.detail); return; }
+    state.detail = null;
     const drawers = {articles:drawArts, keywords:drawKw, quickwins:drawQw};
     if(drawers[state.tab]){ drawers[state.tab](); drawn[state.tab]=true; }
   }
@@ -480,14 +547,20 @@
   $("#period").value = defaultKey;
   $("#period").addEventListener("change", e=>apply(e.target.value));
 
-  $$(".tab").forEach(t=>t.onclick=()=>{
-    const v=t.dataset.view;
-    $$(".tab").forEach(x=>x.setAttribute("aria-selected",x===t));
+  function showView(v){
+    state.tab=v; state.detail=null;
+    $$(".tab").forEach(x=>x.setAttribute("aria-selected",x.dataset.view===v));
     $$(".view").forEach(s=>s.classList.toggle("active",s.id==="view-"+v));
-    state.tab=v;
     const drawers={articles:drawArts, keywords:drawKw, quickwins:drawQw};
     if(!drawn[v] && drawers[v]){ drawers[v](); drawn[v]=true; }
     window.scrollTo({top:0});
+  }
+  $$(".tab").forEach(t=>t.onclick=()=>showView(t.dataset.view));
+  $("#detail-back").onclick=()=>showView("articles");
+  // Clic sur un lien d'article (dans n'importe quelle table) -> fiche détaillée.
+  document.addEventListener("click", e=>{
+    const el = e.target.closest(".art-link");
+    if(el && el.dataset.article){ e.preventDefault(); openDetail(el.dataset.article); }
   });
   $("#search").addEventListener("input",e=>{state.kwQuery=e.target.value; drawKw&&drawKw();});
 
