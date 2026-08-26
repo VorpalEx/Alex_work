@@ -43,12 +43,13 @@ class Config:
     notion_db_keywords: str | None
 
     # Framer (optionnel : source d'inventaire des articles)
+    # La récupération se fait côté Node (framer/fetch_inventory.mjs) ; Python lit
+    # seulement le JSON produit.
+    framer_inventory_file: str | None
     framer_token: str | None
-    framer_base_url: str
+    framer_project_url: str | None
     site_base_url: str
-    framer_collections: dict[str, str]  # {collection_id: prefixe_url}
-    framer_slug_field: str
-    framer_title_field: str
+    framer_collections: dict[str, str]  # {nom_collection: prefixe_url}
 
     # Rapport
     lookback_days: int
@@ -105,12 +106,11 @@ class Config:
             notion_token=_get("NOTION_TOKEN", required=require_notion),
             notion_db_articles=_get("NOTION_DB_ARTICLES", required=require_notion),
             notion_db_keywords=_get("NOTION_DB_KEYWORDS", required=require_notion),
+            framer_inventory_file=_get("FRAMER_INVENTORY_FILE") or "framer_inventory.json",
             framer_token=_get("FRAMER_API_TOKEN"),
-            framer_base_url=(_get("FRAMER_BASE_URL") or "https://api.framer.com/v1").rstrip("/"),
+            framer_project_url=_get("FRAMER_PROJECT_URL"),
             site_base_url=(_get("SITE_BASE_URL") or "https://dillygence.com").rstrip("/"),
             framer_collections=collections,
-            framer_slug_field=_get("FRAMER_SLUG_FIELD") or "slug",
-            framer_title_field=_get("FRAMER_TITLE_FIELD") or "title",
             lookback_days=int(_get("LOOKBACK_DAYS", "28")),
             article_url_regex=regex,
             max_keywords_per_article=int(_get("MAX_KEYWORDS_PER_ARTICLE", "0")),

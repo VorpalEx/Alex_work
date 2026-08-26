@@ -57,21 +57,34 @@ l'onglet *Actions → le run → Artifacts*. Il ne requiert que les secrets
 
 Google Search Console ne liste **que les pages ayant eu des impressions**. Pour
 voir **TOUS** les articles publiés (y compris ceux sans trafic — justement ceux
-à travailler), on utilise **Framer comme source d'inventaire** (Server API).
+à travailler), on utilise **Framer comme source d'inventaire** via sa **Server
+API**, qui est un **SDK Node** (`framer-api`), pas une API REST. Le dossier
+`framer/` contient les scripts Node ; ils écrivent un JSON que Python lit ensuite.
 
-1. Dans Framer : réglages du projet → génère un **token API** (plan payant requis).
-2. Trouve les **IDs de collections** et la structure des items :
+1. Dans Framer : réglages du projet → crée un **token API** (plan payant requis)
+   et note l'**URL du projet** (`https://framer.com/projects/XXXX`).
+2. Découvre les **noms exacts de collections** et la structure des items :
    ```bash
-   FRAMER_API_TOKEN=... python -m seo_tracker.framer
+   cd framer && npm install
+   FRAMER_PROJECT_URL=https://framer.com/projects/XXXX FRAMER_API_KEY=... node probe.mjs
    ```
    (ou lance le workflow **Framer Probe** dans GitHub Actions et lis les logs).
-3. Renseigne `FRAMER_COLLECTIONS` avec le mapping `id=prefixe`, ex. :
-   `FRAMER_COLLECTIONS=col_news=/news,col_blog=/blog,col_cases=/use-case`
-4. Ajuste si besoin `FRAMER_SLUG_FIELD` / `FRAMER_TITLE_FIELD` selon tes champs.
+3. Renseigne le mapping `FRAMER_COLLECTIONS` (`NomExact=prefixe`), ex. :
+   `FRAMER_COLLECTIONS=News=/news,Blog=/blog,Use Cases=/use-case`
+4. Récupère l'inventaire (produit `framer_inventory.json`) :
+   ```bash
+   cd framer && node fetch_inventory.mjs
+   ```
 
-Résultat : chaque article de l'inventaire apparaît dans le dashboard/Notion, avec
-ses métriques GSC+GA4 (ou 0 s'il n'a pas encore de trafic) et son vrai titre.
-Sans token Framer, l'outil retombe sur le mode piloté par Search Console.
+En GitHub Actions, l'étape Node tourne automatiquement avant l'étape Python
+lorsque `FRAMER_PROJECT_URL` est défini. Résultat : chaque article de l'inventaire
+apparaît dans le dashboard/Notion, avec ses métriques GSC+GA4 (ou 0 s'il n'a pas
+encore de trafic) et son vrai titre. Sans Framer, l'outil retombe sur le mode
+piloté par Search Console.
+
+**Secrets/variables GitHub pour Framer** : secret `FRAMER_API_TOKEN` ; variables
+`FRAMER_PROJECT_URL`, `FRAMER_COLLECTIONS`, `SITE_BASE_URL` (et éventuellement
+`FRAMER_SLUG_FIELD` / `FRAMER_TITLE_FIELD`).
 
 ## Installation (à faire une fois)
 

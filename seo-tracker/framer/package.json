@@ -1,0 +1,14 @@
+{
+  "name": "seo-tracker-framer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Récupération de l'inventaire d'articles via la Server API Framer (SDK framer-api).",
+  "scripts": {
+    "probe": "node probe.mjs",
+    "inventory": "node fetch_inventory.mjs"
+  },
+  "dependencies": {
+    "framer-api": "*"
+  }
+}
