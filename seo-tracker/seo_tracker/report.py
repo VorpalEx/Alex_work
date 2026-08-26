@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import sys
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 from .config import Config, ConfigError
@@ -17,6 +17,7 @@ from .framer import fetch_inventory_or_empty as _fetch_inventory
 from .ga4 import fetch_page_metrics
 from .google_auth import build_credentials
 from .gsc import fetch_keyword_rows
+from .periods import PERIODS
 from .transform import merge
 
 logging.basicConfig(
@@ -34,33 +35,31 @@ def run(out_dir: Path) -> int:
         log.error("Configuration invalide : %s", exc)
         return 2
 
-    start, end = config.start_date, config.end_date
-    log.info("Fenêtre d'analyse : %s -> %s", start, end)
-
+    end = config.end_date  # J-3 (données GSC consolidées)
     credentials = build_credentials(config)
 
-    log.info("Search Console : récupération des mots-clés...")
-    keyword_rows = fetch_keyword_rows(credentials, config.gsc_site_url, start, end)
-    log.info("  %d couples (page, mot-clé) récupérés.", len(keyword_rows))
-
-    log.info("GA4 : récupération de l'audience par page...")
-    page_metrics = fetch_page_metrics(credentials, config.ga4_property_id, start, end)
-    log.info("  %d pages récupérées.", len(page_metrics))
-
+    # Inventaire Framer : récupéré une seule fois (identique pour toutes les périodes).
     inventory = _fetch_inventory(config, log)
 
-    articles = merge(
-        keyword_rows,
-        page_metrics,
-        url_regex=config.article_url_regex,
-        min_impressions=config.min_impressions,
-        max_keywords_per_article=config.max_keywords_per_article,
-        inventory=inventory,
-    )
-    total_keywords = sum(len(a.keywords) for a in articles)
-    log.info("Fusion : %d articles, %d mots-clés.", len(articles), total_keywords)
+    payloads = []
+    for key, label, days in PERIODS:
+        start = end - timedelta(days=days - 1)
+        log.info("Période %s (%s -> %s)...", label, start, end)
+        keyword_rows = fetch_keyword_rows(credentials, config.gsc_site_url, start, end)
+        page_metrics = fetch_page_metrics(credentials, config.ga4_property_id, start, end)
+        articles = merge(
+            keyword_rows,
+            page_metrics,
+            url_regex=config.article_url_regex,
+            min_impressions=config.min_impressions,
+            max_keywords_per_article=config.max_keywords_per_article,
+            inventory=inventory,
+        )
+        n_kw = sum(len(a.keywords) for a in articles)
+        log.info("  %d articles, %d mots-clés.", len(articles), n_kw)
+        payloads.append((key, label, start, end, articles))
 
-    data = build_data(articles, start, end, date.today())
+    data = build_data(payloads, date.today())
     html_path = out_dir / "dashboard.html"
     write_dashboard(data, html_path)
     write_csv(data, out_dir)
