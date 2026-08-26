@@ -12,7 +12,7 @@ Format attendu du JSON (liste d'objets) :
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from .config import Config
@@ -25,6 +25,7 @@ class FramerArticle:
     url: str
     path: str
     collection: str = ""
+    alt_paths: list[str] = field(default_factory=list)
 
 
 def load_inventory(path: str | Path) -> list[FramerArticle]:
@@ -41,6 +42,7 @@ def load_inventory(path: str | Path) -> list[FramerArticle]:
                 url=row.get("url", ""),
                 path=row["path"],
                 collection=row.get("collection", ""),
+                alt_paths=list(row.get("alt_paths", []) or []),
             )
         )
     return articles

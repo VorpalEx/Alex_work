@@ -7,8 +7,12 @@
 //                         (nom exact de la collection = préfixe d'URL)
 //   SITE_BASE_URL         (défaut https://dillygence.com)
 //   FRAMER_INVENTORY_FILE (défaut framer_inventory.json)
-//   FRAMER_USE_BASE_SLUG  "true" -> utilise le slug de base (EN) au lieu du slug localisé
+//   FRAMER_USE_LOCALIZED_SLUG "true" -> slug localisé (FR) comme principal
+//                             (défaut: slug de base/EN, = URLs live de dillygence.com)
 //   FRAMER_INCLUDE_DRAFTS "true" -> inclut aussi les brouillons (défaut: publiés seulement)
+//
+// Chaque article émet `path` (URL principale) + `alt_paths` (autres slugs connus),
+// pour que la jointure GSC/GA4 fonctionne quel que soit le slug utilisé en ligne.
 import { connect } from "framer-api";
 import { writeFileSync } from "node:fs";
 
@@ -16,7 +20,7 @@ const url = process.env.FRAMER_PROJECT_URL;
 const key = process.env.FRAMER_API_KEY || process.env.FRAMER_API_TOKEN;
 const site = (process.env.SITE_BASE_URL || "https://dillygence.com").replace(/\/+$/, "");
 const outFile = process.env.FRAMER_INVENTORY_FILE || "framer_inventory.json";
-const useBaseSlug = (process.env.FRAMER_USE_BASE_SLUG || "").toLowerCase() === "true";
+const preferLocalized = (process.env.FRAMER_USE_LOCALIZED_SLUG || "").toLowerCase() === "true";
 const includeDrafts = (process.env.FRAMER_INCLUDE_DRAFTS || "").toLowerCase() === "true";
 
 if (!url) { console.error("FRAMER_PROJECT_URL manquant."); process.exit(2); }
@@ -34,16 +38,12 @@ if (mapping.size === 0) {
   process.exit(2);
 }
 
-// Un champ Framer = { type, value, valueByLocale?: { <locale>: { value } } }.
-// On privilégie la valeur localisée (FR) si présente, sinon la valeur de base.
-function localized(fieldOrSlugMap, baseValue) {
-  if (fieldOrSlugMap && typeof fieldOrSlugMap === "object") {
-    const byLocale = fieldOrSlugMap.valueByLocale || fieldOrSlugMap;
-    for (const k in byLocale) {
-      const v = byLocale[k]?.value;
-      if (v) return v;
-    }
-  }
+const clean = (s) => String(s || "").replace(/^\/+|\/+$/g, "");
+
+// Valeur localisée (FR) d'un champ, sinon valeur de base.
+function localized(fieldObj, baseValue) {
+  const byLocale = fieldObj?.valueByLocale;
+  if (byLocale) for (const k in byLocale) { const v = byLocale[k]?.value; if (v) return v; }
   return baseValue ?? "";
 }
 
@@ -53,24 +53,20 @@ function titleOf(item) {
   if (fd.title) return localized(fd.title, fd.title.value);
   for (const k of Object.keys(fd)) {
     const f = fd[k];
-    if (f && f.type === "string") {
-      const v = localized(f, f.value);
-      if (v) return v;
-    }
+    if (f && f.type === "string") { const v = localized(f, f.value); if (v) return v; }
   }
   return item.slug || "";
 }
 
-// Slug : version localisée (FR) si présente, sinon slug de base (EN).
-function slugOf(item) {
-  if (!useBaseSlug) {
-    const bl = item.slugByLocale || {};
-    for (const k in bl) {
-      const v = bl[k]?.value;
-      if (v) return v;
-    }
-  }
-  return item.slug || "";
+// Slugs candidats : base (EN) + localisé (FR) éventuel. Le principal dépend de la préférence.
+function slugsOf(item) {
+  const base = clean(item.slug);
+  let loc = "";
+  const bl = item.slugByLocale || {};
+  for (const k in bl) { const v = bl[k]?.value; if (v) { loc = clean(v); break; } }
+  const primary = preferLocalized && loc ? loc : base;
+  const alts = [base, loc].filter((s) => s && s !== primary);
+  return { primary, alts };
 }
 
 const framer = await connect(url, key);
@@ -86,15 +82,16 @@ try {
     let kept = 0;
     for (const it of items) {
       if (!includeDrafts && it.draft === true) continue;
-      const slug = String(slugOf(it) || "").replace(/^\/+|\/+$/g, "");
-      if (!slug) continue;
-      const path = `${prefix}/${slug}`;
+      const { primary, alts } = slugsOf(it);
+      if (!primary) continue;
+      const path = `${prefix}/${primary}`;
       inventory.push({
-        title: String(titleOf(it) || slug),
-        slug,
+        title: String(titleOf(it) || primary),
+        slug: primary,
         path,
         url: `${site}${path}`,
         collection: coll.name,
+        alt_paths: alts.map((s) => `${prefix}/${s}`),
       });
       kept++;
     }
@@ -105,4 +102,4 @@ try {
 }
 
 writeFileSync(outFile, JSON.stringify(inventory, null, 2), "utf-8");
-console.log(`✅ ${inventory.length} articles écrits dans ${outFile}`);
+console.log(`✅ ${inventory.length} articles écrits dans ${outFile} (slug principal: ${preferLocalized ? "localisé/FR" : "base/EN"})`);
