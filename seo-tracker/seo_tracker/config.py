@@ -29,6 +29,13 @@ def _get(name: str, default: str | None = None, required: bool = False) -> str |
     return value
 
 
+def _get_int(name: str, default: int) -> int:
+    """Comme _get mais tolère une valeur vide (fréquent avec les variables GitHub
+    non définies passées en chaîne vide) -> retombe sur le défaut."""
+    raw = (os.environ.get(name) or "").strip()
+    return int(raw) if raw else default
+
+
 @dataclass
 class Config:
     # Google
@@ -111,9 +118,9 @@ class Config:
             framer_project_url=_get("FRAMER_PROJECT_URL"),
             site_base_url=(_get("SITE_BASE_URL") or "https://dillygence.com").rstrip("/"),
             framer_collections=collections,
-            lookback_days=int(_get("LOOKBACK_DAYS", "28")),
+            lookback_days=_get_int("LOOKBACK_DAYS", 28),
             article_url_regex=regex,
-            max_keywords_per_article=int(_get("MAX_KEYWORDS_PER_ARTICLE", "0")),
-            min_impressions=int(_get("MIN_IMPRESSIONS", "1")),
+            max_keywords_per_article=_get_int("MAX_KEYWORDS_PER_ARTICLE", 0),
+            min_impressions=_get_int("MIN_IMPRESSIONS", 1),
             prune_stale=(_get("PRUNE_STALE", "false") or "").lower() == "true",
         )
