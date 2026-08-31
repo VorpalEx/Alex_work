@@ -2,12 +2,24 @@ name: SEO Dashboard
 
 # Génère le dashboard HTML + CSV (SANS Notion). Ne requiert que les accès Google.
 # (Optionnel) inventaire complet des articles via Framer.
-# Le résultat est téléchargeable dans l'onglet Actions -> le run -> section "Artifacts".
+# - Artefact téléchargeable dans l'onglet Actions -> le run -> section "Artifacts".
+# - Publié aussi sur GitHub Pages : URL fixe, mise à jour à chaque run (chaque matin).
 
 on:
   schedule:
     - cron: "0 6 * * *"      # tous les jours à 06:00 UTC
   workflow_dispatch: {}       # lancement manuel
+
+# Droits nécessaires au déploiement GitHub Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un seul déploiement Pages à la fois.
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 env:
   FRAMER_INVENTORY_FILE: ${{ github.workspace }}/seo-tracker/framer_inventory.json
@@ -52,6 +64,7 @@ jobs:
           GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
           SITE_BASE_URL: ${{ vars.SITE_BASE_URL }}
           ARTICLE_URL_REGEX: ${{ vars.ARTICLE_URL_REGEX }}
+          ARTICLE_URL_EXCLUDE: ${{ vars.ARTICLE_URL_EXCLUDE }}
           LOOKBACK_DAYS: ${{ vars.LOOKBACK_DAYS }}
           MIN_IMPRESSIONS: ${{ vars.MIN_IMPRESSIONS }}
           MAX_KEYWORDS_PER_ARTICLE: ${{ vars.MAX_KEYWORDS_PER_ARTICLE }}
@@ -66,3 +79,32 @@ jobs:
             seo-tracker/out/articles.csv
             seo-tracker/out/keywords.csv
           retention-days: 30
+
+      # Prépare le site : le dashboard devient la page d'accueil (index.html).
+      - name: Préparer le site GitHub Pages
+        run: |
+          mkdir -p _site
+          cp seo-tracker/out/dashboard.html _site/index.html
+          cp seo-tracker/out/articles.csv seo-tracker/out/keywords.csv _site/ || true
+
+      - name: Configurer Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Uploader l'artefact Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  # Déploiement sur GitHub Pages (URL fixe, à jour à chaque run).
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Déployer sur GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
