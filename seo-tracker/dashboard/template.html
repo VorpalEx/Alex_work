@@ -104,7 +104,7 @@
   .bar-lbl{font-size:12.5px; color:var(--ink-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .bar-val{font-size:12.5px; font-weight:600}
   .bar-track{grid-column:1/-1; height:9px; background:var(--surface-2); border-radius:5px; overflow:hidden}
-  .bar-fill{height:100%; border-radius:5px; background:linear-gradient(90deg,var(--accent),var(--accent-ink)); min-width:3px;
+  .bar-fill{display:block; height:100%; border-radius:5px; background:linear-gradient(90deg,var(--accent),var(--accent-ink)); min-width:3px;
     transition:width .7s cubic-bezier(.2,.7,.2,1)}
   .muted-empty{color:var(--muted); font-size:12.5px; padding:8px 0}
 
@@ -112,8 +112,27 @@
   .brk{display:grid; grid-template-columns:88px 1fr auto; align-items:center; gap:10px}
   .brk .tag{font-size:12.5px; font-weight:500}
   .brk .btrack{height:8px; background:var(--surface-2); border-radius:5px; overflow:hidden}
-  .brk .bfill{height:100%; border-radius:5px}
+  .brk .bfill{display:block; height:100%; border-radius:5px; transition:width .7s cubic-bezier(.2,.7,.2,1)}
   .brk .bval{font-size:12.5px; font-weight:600; color:var(--ink-2)}
+  .brk.w{grid-template-columns:120px 1fr auto}
+
+  /* Donut SVG + légende */
+  .donut-wrap{display:flex; align-items:center; gap:20px; flex-wrap:wrap; padding-top:8px}
+  .donut-wrap svg{flex:none}
+  .donut-mid{font-family:"Bricolage Grotesque",sans-serif}
+  .legend{display:flex; flex-direction:column; gap:9px; font-size:12.5px; min-width:150px; flex:1}
+  .legend .lg{display:flex; align-items:center; gap:8px}
+  .legend .sw{width:11px; height:11px; border-radius:3px; flex:none}
+  .legend .lg b{font-weight:500; color:var(--ink)}
+  .legend .lg-v{color:var(--ink-2); font-weight:600; margin-left:auto; font-variant-numeric:tabular-nums; white-space:nowrap}
+
+  /* Barres verticales (articles par page) */
+  .vbars{display:flex; align-items:flex-end; gap:12px; height:184px; padding:8px 4px 0}
+  .vbar{flex:1; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:7px}
+  .vbar .vcap{font-size:13px; font-weight:600; font-variant-numeric:tabular-nums}
+  .vbar .vwrap{width:100%; flex:1; display:flex; align-items:flex-end; justify-content:center}
+  .vbar .vfill{width:64%; max-width:52px; border-radius:6px 6px 0 0; min-height:4px; transition:height .7s cubic-bezier(.2,.7,.2,1)}
+  .vbar .vlbl{font-size:11.5px; color:var(--muted); text-align:center; line-height:1.2}
 
   .seg{display:inline-flex; gap:3px; background:var(--surface-2); border:1px solid var(--border); padding:3px; border-radius:999px; flex-wrap:wrap}
   .seg button{cursor:pointer; border:0; background:transparent; color:var(--ink-2); padding:6px 13px; border-radius:999px; font-size:12.5px; font-weight:500}
@@ -148,6 +167,11 @@
   .sect.news{color:var(--accent-ink); background:var(--accent-weak)}
   .sect.blog{color:var(--serious); background:var(--serious-weak)}
   .sect.usecase{color:var(--good); background:var(--good-weak)}
+  .sect.case{color:var(--warning); background:var(--warning-weak)}
+  .lang{display:inline-block; font-size:10px; font-weight:600; letter-spacing:.02em; padding:1px 7px; border-radius:5px;
+    margin-right:7px; vertical-align:1px; border:1px solid var(--border-strong)}
+  .lang.en{color:var(--ink-2); background:var(--surface-2)}
+  .lang.fr{color:var(--accent-ink); background:var(--accent-weak); border-color:transparent}
   .pill{display:inline-flex; align-items:center; gap:5px; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:600; font-variant-numeric:tabular-nums}
   .pill::before{content:""; width:6px; height:6px; border-radius:50%; background:currentColor}
   .pill.p-good{color:var(--good); background:var(--good-weak)}
@@ -159,6 +183,22 @@
   .qw-top{display:flex; align-items:center; gap:16px; margin-bottom:14px; flex-wrap:wrap}
   .qw-num{font-family:"Bricolage Grotesque",sans-serif; font-size:44px; font-weight:700; color:var(--accent-ink); letter-spacing:-.02em; line-height:1}
   .qw-txt{font-size:13px; color:var(--ink-2); max-width:520px}
+
+  /* Lien vers la fiche article */
+  .art-link{color:var(--ink); text-decoration:none; cursor:pointer; border-bottom:1px dotted var(--border-strong)}
+  .art-link:hover{color:var(--accent); border-bottom-color:var(--accent)}
+  .ext{margin-left:6px; color:var(--muted); text-decoration:none; font-size:11px}
+  .ext:hover{color:var(--accent)}
+
+  /* Fiche article (vue détail) */
+  .back{cursor:pointer; background:var(--surface); border:1px solid var(--border); color:var(--ink-2);
+    border-radius:999px; padding:7px 14px 7px 11px; font-size:12.5px; font-weight:500; display:inline-flex; gap:6px; align-items:center; margin-bottom:14px}
+  .back:hover{color:var(--ink); border-color:var(--border-strong)}
+  .detail-hero{display:flex; flex-direction:column; gap:6px; margin-bottom:16px}
+  .detail-hero h2{font-size:22px; font-weight:700}
+  .detail-hero .d-url{font-size:12.5px; color:var(--muted); text-decoration:none; word-break:break-all; width:fit-content}
+  .detail-hero .d-url:hover{color:var(--accent)}
+  .detail-hero .row{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
 
   footer{max-width:1240px; margin:0 auto; padding:10px 22px 22px; color:var(--muted); font-size:11.5px; line-height:1.6}
   footer b{color:var(--ink-2); font-weight:600}
@@ -179,7 +219,7 @@
       <div><h1>SEO&nbsp;·&nbsp;Dillygence</h1><div class="sub">Suivi de positionnement — dillygence.com</div></div>
     </div>
     <nav class="tabs" id="tabs" role="tablist">
-      <button class="tab" role="tab" aria-selected="true" data-view="overview">Vue d'ensemble</button>
+      <button class="tab" role="tab" aria-selected="true" data-view="overview">Dashboard</button>
       <button class="tab" role="tab" aria-selected="false" data-view="articles">Articles <span class="n" id="n-art">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-view="keywords">Mots-clés <span class="n" id="n-kw">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-view="quickwins">Quick wins <span class="n" id="n-qw">0</span></button>
@@ -201,7 +241,30 @@
 <main>
   <section class="view active" id="view-overview">
     <div class="kpis" id="kpis"></div>
+
     <div class="cols">
+      <div class="panel">
+        <div class="phead"><h2>Positions des mots-clés</h2><span class="pnote" id="pos-note"></span></div>
+        <div class="pbody"><div class="breakdown" id="posbuckets"></div></div>
+      </div>
+      <div class="panel">
+        <div class="phead"><h2>Mots-clés par section</h2><span class="pnote">répartition</span></div>
+        <div class="pbody"><div class="donut-wrap" id="donut-kw"></div></div>
+      </div>
+    </div>
+
+    <div class="cols" style="margin-top:14px">
+      <div class="panel">
+        <div class="phead"><h2>Top articles par impressions</h2><span class="pnote" id="impr-note"></span></div>
+        <div class="pbody"><div class="bars" id="bars-impr"></div></div>
+      </div>
+      <div class="panel">
+        <div class="phead"><h2>Articles par page Google</h2><span class="pnote">position moyenne</span></div>
+        <div class="pbody"><div class="vbars" id="pagebars"></div></div>
+      </div>
+    </div>
+
+    <div class="cols" style="margin-top:14px">
       <div class="panel">
         <div class="phead"><h2>Top articles par clics</h2><span class="pnote" id="bars-note"></span></div>
         <div class="pbody"><div class="bars" id="bars"></div></div>
@@ -216,6 +279,7 @@
   <section class="view" id="view-articles">
     <div class="toolbar">
       <div class="seg" id="seg-section" role="group" aria-label="Filtrer par section"></div>
+      <div class="seg" id="seg-lang" role="group" aria-label="Filtrer par langue"></div>
       <span class="count-note" id="art-count"></span>
     </div>
     <div class="table-wrap"><table><thead id="art-head"></thead><tbody id="art-body"></tbody></table></div>
@@ -238,6 +302,21 @@
       <span class="qw-txt"><b style="color:var(--ink)">Mots-clés en position 5–15.</b> À un cheveu du top&nbsp;4 : optimiser ces pages (titre, contenu, maillage) donne les gains les plus rapides. Triés par impressions = potentiel de trafic.</span>
     </div>
     <div class="table-wrap"><table><thead id="qw-head"></thead><tbody id="qw-body"></tbody></table></div>
+  </section>
+
+  <section class="view" id="view-detail">
+    <button class="back" id="detail-back">← Retour aux articles</button>
+    <div class="detail-hero">
+      <div class="row"><span class="sect" id="d-sect"></span><span class="lang" id="d-lang"></span><h2 id="d-title"></h2></div>
+      <a class="d-url" id="d-url" target="_blank" rel="noopener"></a>
+    </div>
+    <div class="kpis" id="d-kpis"></div>
+    <div class="panel">
+      <div class="phead"><h2>Mots-clés de cet article</h2><span class="pnote" id="d-kwnote"></span></div>
+      <div class="pbody" style="padding-top:4px">
+        <div class="table-wrap" style="box-shadow:none; border:0"><table><thead id="d-head"></thead><tbody id="d-body"></tbody></table></div>
+      </div>
+    </div>
   </section>
 </main>
 
@@ -317,10 +396,38 @@
   const pos = n=>n.toLocaleString("fr-FR",{minimumFractionDigits:1,maximumFractionDigits:1});
   const esc = s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const dash = '<span style="color:var(--muted)">—</span>';
-  const posPill = p=>{ if(!p||p<=0) return dash; const c=p<=3?"p-good":p<=10?"p-warn":p<=20?"p-ser":"p-crit"; return `<span class="pill ${c} tnum">${pos(p)}</span>`;};
+  const pageOf = p => Math.max(1, Math.ceil(p/10));
+  const posPill = p=>{ if(!p||p<=0) return dash; const c=p<=3?"p-good":p<=10?"p-warn":p<=20?"p-ser":"p-crit";
+    return `<span class="pill ${c} tnum" title="Position moyenne ${pos(p)} · page ${pageOf(p)}">P${pageOf(p)}&nbsp;·&nbsp;${pos(p)}</span>`;};
   const pctCell = v=>(!v||v<=0)?dash:pct(v);
-  const sectionOf = p => p.includes("/news")?"News" : p.includes("/use-case")?"Use case" : p.includes("/blog")?"Blog" : "Autre";
-  const sectClass = s => s==="News"?"news" : s==="Use case"?"usecase" : "blog";
+  const sectionOf = p =>
+    (p.includes("/news")||p.includes("/actualites"))       ? "News" :
+    (p.includes("/use-case")||p.includes("/cas-d-usage"))  ? "Use case" :
+    (p.includes("/blog"))                                  ? "Blog" :
+    (p.includes("/cases"))                                 ? "Case" : "Autre";
+  const sectClass = s => s==="News"?"news" : s==="Use case"?"usecase" : s==="Case"?"case" : "blog";
+  const SECTION_COLORS = {News:"var(--accent)","Use case":"var(--good)",Blog:"var(--serious)",Case:"var(--warning)"};
+  const langOf = p => p.startsWith("/fr/") ? "FR" : "EN";
+  const langBadge = p => { const l=langOf(p); return `<span class="lang ${l==="FR"?"fr":"en"}" title="${l==="FR"?"Version française":"Version anglaise"}">${l==="FR"?"🇫🇷":"🇬🇧"} ${l}</span>`; };
+
+  // Donut SVG (segments = [{label,value,color}])
+  function donut(segs, total, mid, sub){
+    const r=54, C=2*Math.PI*r, cx=70, cy=70; let off=0;
+    const arcs = segs.filter(s=>s.value>0).map(s=>{
+      const len=s.value/total*C;
+      const c=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${s.color}" stroke-width="18" stroke-linecap="butt"
+        stroke-dasharray="${len.toFixed(2)} ${(C-len).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 ${cx} ${cy})"/>`;
+      off+=len; return c;
+    }).join("");
+    return `<svg width="140" height="140" viewBox="0 0 140 140" role="img" aria-label="Répartition">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="18"/>${arcs}
+      <text x="70" y="66" text-anchor="middle" class="donut-mid" font-size="27" font-weight="700" fill="var(--ink)">${mid}</text>
+      <text x="70" y="85" text-anchor="middle" font-size="11" fill="var(--muted)">${sub}</text></svg>`;
+  }
+  function legend(segs, total){
+    return `<div class="legend">`+segs.filter(s=>s.value>0).map(s=>`<div class="lg"><span class="sw" style="background:${s.color}"></span>
+      <b>${esc(s.label)}</b><span class="lg-v">${fmt(s.value)} · ${Math.round(s.value/total*100)}%</span></div>`).join("")+`</div>`;
+  }
 
   let DATA;
   try{ DATA = JSON.parse($("#seo-data").textContent); }
@@ -344,7 +451,7 @@
   // --- État & courant ------------------------------------------------------
   const tip = $("#tip");
   let arts=[], kws=[], pathTitle={};
-  let state = {tab:"overview", sort:{}, secFilter:"Tout", kwQuery:""};
+  let state = {tab:"overview", sort:{}, secFilter:"Tout", langFilter:"Tout", kwQuery:"", detail:null};
 
   function makeTable(headEl, bodyEl, cols, getRows, defSort, key){
     if(!state.sort[key]) state.sort[key] = {k:defSort.k, dir:defSort.dir};
@@ -379,7 +486,29 @@
     ].map(k=>`<div class="kpi${k.accent?' accent':''}"><div class="lbl">${k.lbl}</div>
       <div class="val tnum">${k.val}</div><div class="sub">${k.sub}</div><div class="src">${k.src}</div></div>`).join("");
 
-    // Bars
+    const secColors = SECTION_COLORS;
+
+    // Distribution des positions (mots-clés)
+    const buckets=[
+      {label:"Top 3 (1–3)",   test:p=>p>0&&p<=3,   color:"var(--good)"},
+      {label:"Page 1 (4–10)", test:p=>p>3&&p<=10,  color:"var(--warning)"},
+      {label:"Page 2 (11–20)",test:p=>p>10&&p<=20, color:"var(--serious)"},
+      {label:"Page 3+ (21+)", test:p=>p>20,        color:"var(--critical)"}
+    ].map(b=>({...b, n:kws.filter(k=>b.test(k.position)).length}));
+    const bmax=Math.max(...buckets.map(b=>b.n),1);
+    $("#pos-note").textContent = kws.length?fmt(kws.length)+" mots-clés":"";
+    $("#posbuckets").innerHTML = kws.length ? buckets.map(b=>`<div class="brk w">
+      <span class="tag">${b.label}</span><span class="btrack"><span class="bfill" style="width:0;background:${b.color}" data-w="${b.n/bmax*100}"></span></span>
+      <span class="bval tnum">${fmt(b.n)}</span></div>`).join("") : '<div class="muted-empty">Aucun mot-clé sur cette période.</div>';
+    requestAnimationFrame(()=>$$("#posbuckets .bfill").forEach(f=>f.style.width=f.dataset.w+"%"));
+
+    // Donut : mots-clés par section
+    const kwBySec={}; kws.forEach(k=>{const s=sectionOf(k.path); kwBySec[s]=(kwBySec[s]||0)+1;});
+    const kwSegs=Object.keys(secColors).filter(s=>kwBySec[s]).map(s=>({label:s,value:kwBySec[s],color:secColors[s]}));
+    $("#donut-kw").innerHTML = kws.length ? donut(kwSegs,kws.length,fmt(kws.length),"mots-clés")+legend(kwSegs,kws.length)
+      : '<div class="muted-empty">—</div>';
+
+    // Bars — top articles par clics
     const top=[...arts].filter(a=>a.clicks>0).sort((a,b)=>b.clicks-a.clicks).slice(0,10);
     const maxC=Math.max(...top.map(a=>a.clicks),1);
     $("#bars-note").textContent = top.length?top.length+" premiers":"";
@@ -388,6 +517,18 @@
         <span class="bar-track"><span class="bar-fill" style="width:0"></span></span></div>`).join("")
       : '<div class="muted-empty">Aucun clic sur cette période pour le moment.</div>';
     requestAnimationFrame(()=>$$(".bar-row",$("#bars")).forEach((r,i)=>r.querySelector(".bar-fill").style.width=(top[i].clicks/maxC*100)+"%"));
+
+    // Bars — top articles par impressions
+    const topI=[...arts].filter(a=>a.impressions>0).sort((a,b)=>b.impressions-a.impressions).slice(0,10);
+    const maxI=Math.max(...topI.map(a=>a.impressions),1);
+    $("#impr-note").textContent = topI.length?topI.length+" premiers":"";
+    $("#bars-impr").innerHTML = topI.length ? topI.map(a=>`<div class="bar-row" data-kw="${esc(a.title)}" data-val="${fmt(a.impressions)} impr. · ${fmt(a.clicks)} clics · pos. ${pos(a.position)}">
+        <span class="bar-lbl">${esc(a.title)}</span><span class="bar-val tnum">${fmt(a.impressions)}</span>
+        <span class="bar-track"><span class="bar-fill" style="width:0;background:linear-gradient(90deg,var(--good),#0a7d0a)"></span></span></div>`).join("")
+      : '<div class="muted-empty">Aucune impression sur cette période.</div>';
+    requestAnimationFrame(()=>$$(".bar-row",$("#bars-impr")).forEach((r,i)=>r.querySelector(".bar-fill").style.width=(topI[i].impressions/maxI*100)+"%"));
+
+    // Tooltips (toutes les barres horizontales)
     $$(".bar-row").forEach(r=>{
       r.addEventListener("mousemove",e=>{tip.querySelector(".t-kw").textContent=r.dataset.kw;
         tip.querySelector(".t-val").textContent=r.dataset.val; tip.style.opacity=1;
@@ -395,8 +536,22 @@
       r.addEventListener("mouseleave",()=>tip.style.opacity=0);
     });
 
-    // Breakdown
-    const secColors={News:"var(--accent)","Use case":"var(--good)",Blog:"var(--serious)"};
+    // Articles par page Google (barres verticales)
+    const positioned=arts.filter(a=>a.position>0);
+    const pageDefs=[
+      {label:"Page 1",  test:a=>a.position<=10,               color:"var(--good)"},
+      {label:"Page 2",  test:a=>a.position>10&&a.position<=20,color:"var(--warning)"},
+      {label:"Page 3",  test:a=>a.position>20&&a.position<=30,color:"var(--serious)"},
+      {label:"Page 4+", test:a=>a.position>30,                color:"var(--critical)"}
+    ].map(p=>({...p, n:positioned.filter(a=>p.test(a.position)).length}));
+    const pmax=Math.max(...pageDefs.map(p=>p.n),1);
+    $("#pagebars").innerHTML = positioned.length ? pageDefs.map(p=>`<div class="vbar">
+      <span class="vcap tnum">${fmt(p.n)}</span>
+      <span class="vwrap"><span class="vfill" style="height:0;background:${p.color}" data-h="${p.n/pmax*100}"></span></span>
+      <span class="vlbl">${p.label}</span></div>`).join("") : '<div class="muted-empty">Aucun article positionné.</div>';
+    requestAnimationFrame(()=>$$("#pagebars .vfill").forEach(f=>f.style.height=f.dataset.h+"%"));
+
+    // Breakdown — articles par section
     const bySec={}; arts.forEach(a=>{bySec[a._section]=(bySec[a._section]||0)+1;});
     const maxS=Math.max(...Object.values(bySec),1);
     $("#breakdown").innerHTML = Object.keys(secColors).filter(s=>bySec[s]).map(s=>`<div class="brk">
@@ -409,6 +564,19 @@
     if(!present.includes(state.secFilter)) state.secFilter="Tout";
     $$("#seg-section button").forEach(b=>b.onclick=()=>{state.secFilter=b.dataset.s;
       $$("#seg-section button").forEach(x=>x.setAttribute("aria-pressed",x===b)); updArtCount(); drawArts&&drawArts();});
+
+    // Language filter — n'apparaît que si les deux langues sont présentes.
+    const byLang={}; arts.forEach(a=>{byLang[a._lang]=(byLang[a._lang]||0)+1;});
+    const langs=["EN","FR"].filter(l=>byLang[l]);
+    const langLabel={EN:"🇬🇧 EN",FR:"🇫🇷 FR"};
+    if(langs.length>1){
+      const opts=["Tout",...langs];
+      $("#seg-lang").hidden=false;
+      $("#seg-lang").innerHTML=opts.map(l=>`<button data-l="${l}" aria-pressed="${l===state.langFilter}">${l==="Tout"?"Tout":langLabel[l]} ${l==="Tout"?"":`<span style="opacity:.6">${byLang[l]}</span>`}</button>`).join("");
+      if(!opts.includes(state.langFilter)) state.langFilter="Tout";
+      $$("#seg-lang button").forEach(b=>b.onclick=()=>{state.langFilter=b.dataset.l;
+        $$("#seg-lang button").forEach(x=>x.setAttribute("aria-pressed",x===b)); updArtCount(); drawArts&&drawArts();});
+    } else { $("#seg-lang").hidden=true; state.langFilter="Tout"; }
     updArtCount();
 
     // Quick wins header
@@ -416,10 +584,11 @@
     $("#n-qw").textContent=wins.length; $("#qw-num").textContent=wins.length;
   }
 
-  function updArtCount(){const n=arts.filter(a=>state.secFilter==="Tout"||a._section===state.secFilter).length; $("#art-count").textContent=`${n} article${n>1?"s":""}`;}
+  const artMatch=a=>(state.secFilter==="Tout"||a._section===state.secFilter)&&(state.langFilter==="Tout"||a._lang===state.langFilter);
+  function updArtCount(){const n=arts.filter(artMatch).length; $("#art-count").textContent=`${n} article${n>1?"s":""}`;}
 
   const artCols=[
-    {k:"title",lbl:"Article",cell:a=>`<span class="cell-main"><span class="sect ${sectClass(a._section)}">${a._section}</span><a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.title)}</a><span class="cell-path">${esc(a.path)}</span></span>`},
+    {k:"title",lbl:"Article",cell:a=>`<span class="cell-main"><span class="sect ${sectClass(a._section)}">${a._section}</span>${langBadge(a.path)}<a class="art-link" data-article="${esc(a.path)}">${esc(a.title)}</a><a class="ext" href="${esc(a.url)}" target="_blank" rel="noopener" title="Voir la page en ligne">↗</a><span class="cell-path">${esc(a.path)}</span></span>`},
     {k:"clicks",lbl:"Clics",cell:a=>fmt(a.clicks)},
     {k:"impressions",lbl:"Impr.",cell:a=>fmt(a.impressions)},
     {k:"ctr",lbl:"CTR",cell:a=>pctCell(a.ctr)},
@@ -430,7 +599,7 @@
   ];
   const kwCols=[
     {k:"kw",lbl:"Mot-clé",cell:w=>`<span class="cell-main">${esc(w.kw)}</span>`},
-    {k:"path",lbl:"Article",cell:w=>`<span class="cell-path" style="max-width:260px">${esc(pathTitle[w.path]||w.path)}</span>`},
+    {k:"path",lbl:"Article",cell:w=>`<a class="art-link cell-path" style="max-width:260px" data-article="${esc(w.path)}"><span title="${langOf(w.path)==="FR"?"FR":"EN"}">${langOf(w.path)==="FR"?"🇫🇷":"🇬🇧"}</span> ${esc(pathTitle[w.path]||w.path)}</a>`},
     {k:"clicks",lbl:"Clics",cell:w=>fmt(w.clicks)},
     {k:"impressions",lbl:"Impr.",cell:w=>fmt(w.impressions)},
     {k:"ctr",lbl:"CTR",cell:w=>pctCell(w.ctr)},
@@ -438,16 +607,51 @@
   ];
   const qwCols=[
     {k:"kw",lbl:"Mot-clé",cell:w=>`<span class="cell-main">${esc(w.kw)}</span>`},
-    {k:"path",lbl:"Article",cell:w=>`<span class="cell-path" style="max-width:240px">${esc(pathTitle[w.path]||w.path)}</span>`},
+    {k:"path",lbl:"Article",cell:w=>`<a class="art-link cell-path" style="max-width:240px" data-article="${esc(w.path)}"><span title="${langOf(w.path)==="FR"?"FR":"EN"}">${langOf(w.path)==="FR"?"🇫🇷":"🇬🇧"}</span> ${esc(pathTitle[w.path]||w.path)}</a>`},
+    {k:"position",lbl:"Position",cell:w=>posPill(w.position)},
+    {k:"impressions",lbl:"Impr.",cell:w=>fmt(w.impressions)},
+    {k:"clicks",lbl:"Clics",cell:w=>fmt(w.clicks)},
+    {k:"ctr",lbl:"CTR",cell:w=>pctCell(w.ctr)}
+  ];
+  const detailKwCols=[
+    {k:"kw",lbl:"Mot-clé",cell:w=>`<span class="cell-main">${esc(w.kw)}</span>`},
     {k:"position",lbl:"Position",cell:w=>posPill(w.position)},
     {k:"impressions",lbl:"Impr.",cell:w=>fmt(w.impressions)},
     {k:"clicks",lbl:"Clics",cell:w=>fmt(w.clicks)},
     {k:"ctr",lbl:"CTR",cell:w=>pctCell(w.ctr)}
   ];
 
+  function openDetail(path){
+    const a = arts.find(x=>x.path===path);
+    if(!a) return;
+    state.detail = path;
+    $("#d-sect").className = "sect "+sectClass(a._section);
+    $("#d-sect").textContent = a._section;
+    $("#d-lang").className = "lang "+(a._lang==="FR"?"fr":"en");
+    $("#d-lang").innerHTML = a._lang==="FR"?"🇫🇷 FR":"🇬🇧 EN";
+    $("#d-title").textContent = a.title;
+    $("#d-url").href = a.url; $("#d-url").textContent = a.url;
+    $("#d-kpis").innerHTML = [
+      {lbl:"Position moy.", val: a.position>0?`P${pageOf(a.position)} · ${pos(a.position)}`:"—", accent:true},
+      {lbl:"Clics", val: fmt(a.clicks)},
+      {lbl:"Impressions", val: fmt(a.impressions)},
+      {lbl:"CTR", val: a.ctr>0?pct(a.ctr):"—"},
+      {lbl:"Vues", val: fmt(a.views), src:"GA4"},
+      {lbl:"Temps moyen", val: a.avg_time>0?secs(a.avg_time):"—", src:"GA4"}
+    ].map(k=>`<div class="kpi${k.accent?' accent':''}"><div class="lbl">${k.lbl}</div>
+      <div class="val tnum">${k.val}</div><div class="src">${k.src||"GSC"}</div></div>`).join("");
+    const n = kws.filter(k=>k.path===path).length;
+    $("#d-kwnote").textContent = n?`${n} mot${n>1?"s":""}-clé${n>1?"s":""} positionné${n>1?"s":""}`:"aucun mot-clé positionné sur la période";
+    const draw = makeTable($("#d-head"),$("#d-body"),detailKwCols,()=>kws.filter(k=>k.path===path),{k:"impressions",dir:-1},"detail");
+    draw();
+    $$(".view").forEach(s=>s.classList.toggle("active",s.id==="view-detail"));
+    $$(".tab").forEach(x=>x.setAttribute("aria-selected",false));
+    window.scrollTo({top:0});
+  }
+
   function buildDrawers(){
     drawArts = makeTable($("#art-head"),$("#art-body"),artCols,
-      ()=>arts.filter(a=>state.secFilter==="Tout"||a._section===state.secFilter),{k:"clicks",dir:-1},"articles");
+      ()=>arts.filter(artMatch),{k:"clicks",dir:-1},"articles");
     drawKw = makeTable($("#kw-head"),$("#kw-body"),kwCols,()=>{
       const q=state.kwQuery.toLowerCase();
       const r=q?kws.filter(w=>w.kw.toLowerCase().includes(q)||(pathTitle[w.path]||w.path).toLowerCase().includes(q)):[...kws];
@@ -460,7 +664,7 @@
   // --- Application d'une période -------------------------------------------
   function apply(key){
     const p = periods.find(x=>x.key===key) || periods[0];
-    arts = (p.articles||[]).map(a=>({...a})); arts.forEach(a=>a._section=sectionOf(a.path));
+    arts = (p.articles||[]).map(a=>({...a})); arts.forEach(a=>{a._section=sectionOf(a.path); a._lang=langOf(a.path);});
     kws = (p.keywords||[]).map(k=>({...k}));
     pathTitle={}; arts.forEach(a=>pathTitle[a.path]=a.title);
     $("#m-range").textContent = p.period || p.label || "";
@@ -469,6 +673,9 @@
     renderStatic();
     buildDrawers();
     drawn = {overview:true};
+    // Si on est sur une fiche article, on la ré-affiche avec les données de la période.
+    if(state.detail && arts.some(a=>a.path===state.detail)){ openDetail(state.detail); return; }
+    state.detail = null;
     const drawers = {articles:drawArts, keywords:drawKw, quickwins:drawQw};
     if(drawers[state.tab]){ drawers[state.tab](); drawn[state.tab]=true; }
   }
@@ -478,14 +685,20 @@
   $("#period").value = defaultKey;
   $("#period").addEventListener("change", e=>apply(e.target.value));
 
-  $$(".tab").forEach(t=>t.onclick=()=>{
-    const v=t.dataset.view;
-    $$(".tab").forEach(x=>x.setAttribute("aria-selected",x===t));
+  function showView(v){
+    state.tab=v; state.detail=null;
+    $$(".tab").forEach(x=>x.setAttribute("aria-selected",x.dataset.view===v));
     $$(".view").forEach(s=>s.classList.toggle("active",s.id==="view-"+v));
-    state.tab=v;
     const drawers={articles:drawArts, keywords:drawKw, quickwins:drawQw};
     if(!drawn[v] && drawers[v]){ drawers[v](); drawn[v]=true; }
     window.scrollTo({top:0});
+  }
+  $$(".tab").forEach(t=>t.onclick=()=>showView(t.dataset.view));
+  $("#detail-back").onclick=()=>showView("articles");
+  // Clic sur un lien d'article (dans n'importe quelle table) -> fiche détaillée.
+  document.addEventListener("click", e=>{
+    const el = e.target.closest(".art-link");
+    if(el && el.dataset.article){ e.preventDefault(); openDetail(el.dataset.article); }
   });
   $("#search").addEventListener("input",e=>{state.kwQuery=e.target.value; drawKw&&drawKw();});
 

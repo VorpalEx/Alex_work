@@ -61,6 +61,7 @@ class Config:
     # Rapport
     lookback_days: int
     article_url_regex: re.Pattern | None
+    article_url_exclude: re.Pattern | None
     max_keywords_per_article: int
     min_impressions: int
     prune_stale: bool
@@ -84,16 +85,31 @@ class Config:
                 "GOOGLE_APPLICATION_CREDENTIALS (chemin du fichier JSON)."
             )
 
-        # Pages d'articles Dillygence = /news/, /blog/, /use-case(s)/.
+        # Pages d'articles Dillygence.
+        #   EN : /news/, /blog/, /use-cases/, /cases/
+        #   FR : /fr/actualites/ (news), /fr/cas-d-usage/ (use cases)
         # - non défini ou vide  -> filtre par défaut ci-dessous
         # - "all" / "*"         -> tout inclure (aucun filtre)
         # - toute autre valeur  -> regex personnalisée
-        default_regex = r"/(news|blog|use-cases?)(/|$)"
+        default_regex = r"/(news|blog|use-cases?|cases|fr/actualites|fr/cas-d-usage)(/|$)"
         regex_raw = (_get("ARTICLE_URL_REGEX") or "").strip() or default_regex
         if regex_raw.lower() in ("all", "*", ".*"):
             regex = None
         else:
             regex = re.compile(regex_raw, re.IGNORECASE)
+
+        # URLs à bannir en priorité (l'exclusion l'emporte sur l'inclusion).
+        # Les vraies pages FR utilisent des préfixes localisés (/fr/actualites,
+        # /fr/cas-d-usage). Les variantes /fr/news, /fr/use-case(s), /fr/blog,
+        # /fr/cases sont des URLs non-canoniques à écarter.
+        # - non défini ou vide -> exclusion par défaut ci-dessous
+        # - "none" / "off"     -> aucune exclusion
+        default_exclude = r"/fr/(news|blog|use-cases?|cases)(/|$)"
+        exclude_raw = (_get("ARTICLE_URL_EXCLUDE") or "").strip() or default_exclude
+        if exclude_raw.lower() in ("none", "off", "false"):
+            exclude = None
+        else:
+            exclude = re.compile(exclude_raw, re.IGNORECASE)
 
         # Framer : FRAMER_COLLECTIONS="collId1=/news,collId2=/blog,collId3=/use-case"
         collections: dict[str, str] = {}
@@ -120,6 +136,7 @@ class Config:
             framer_collections=collections,
             lookback_days=_get_int("LOOKBACK_DAYS", 28),
             article_url_regex=regex,
+            article_url_exclude=exclude,
             max_keywords_per_article=_get_int("MAX_KEYWORDS_PER_ARTICLE", 0),
             min_impressions=_get_int("MIN_IMPRESSIONS", 1),
             prune_stale=(_get("PRUNE_STALE", "false") or "").lower() == "true",

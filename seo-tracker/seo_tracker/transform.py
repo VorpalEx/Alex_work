@@ -53,6 +53,7 @@ def merge(
     page_metrics: dict[str, PageMetrics],
     *,
     url_regex: re.Pattern | None = None,
+    exclude_regex: re.Pattern | None = None,
     min_impressions: int = 1,
     max_keywords_per_article: int = 0,
     inventory: list | None = None,
@@ -78,6 +79,9 @@ def merge(
     grouped: dict[str, list[KeywordRow]] = defaultdict(list)
     for row in keyword_rows:
         if row.impressions < min_impressions:
+            continue
+        # L'exclusion l'emporte sur l'inclusion (ex. bannir /fr/news, /fr/use-case…).
+        if exclude_regex and exclude_regex.search(row.page):
             continue
         if url_regex and not url_regex.search(row.page):
             continue

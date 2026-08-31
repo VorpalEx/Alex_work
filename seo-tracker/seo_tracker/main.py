@@ -47,6 +47,7 @@ def run() -> int:
         keyword_rows,
         page_metrics,
         url_regex=config.article_url_regex,
+        exclude_regex=config.article_url_exclude,
         min_impressions=config.min_impressions,
         max_keywords_per_article=config.max_keywords_per_article,
         inventory=inventory,
