@@ -81,26 +81,27 @@ jobs:
           retention-days: 30
 
       # Prépare le site : le dashboard devient la page d'accueil (index.html).
+      # Non-bloquant : si Pages n'est pas (encore) activé, la génération et
+      # l'artefact téléchargeable restent en succès.
       - name: Préparer le site GitHub Pages
         run: |
           mkdir -p _site
           cp seo-tracker/out/dashboard.html _site/index.html
           cp seo-tracker/out/articles.csv seo-tracker/out/keywords.csv _site/ || true
 
-      - name: Configurer Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
       - name: Uploader l'artefact Pages
         uses: actions/upload-pages-artifact@v3
+        continue-on-error: true
         with:
           path: _site
 
   # Déploiement sur GitHub Pages (URL fixe, à jour à chaque run).
+  # Prérequis : activer Pages une fois — Settings → Pages → Source : GitHub Actions.
+  # Non-bloquant : tant que Pages n'est pas activé, ce job n'échoue pas le workflow.
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    continue-on-error: true
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
