@@ -168,6 +168,10 @@
   .sect.blog{color:var(--serious); background:var(--serious-weak)}
   .sect.usecase{color:var(--good); background:var(--good-weak)}
   .sect.case{color:var(--warning); background:var(--warning-weak)}
+  .lang{display:inline-block; font-size:10px; font-weight:600; letter-spacing:.02em; padding:1px 7px; border-radius:5px;
+    margin-right:7px; vertical-align:1px; border:1px solid var(--border-strong)}
+  .lang.en{color:var(--ink-2); background:var(--surface-2)}
+  .lang.fr{color:var(--accent-ink); background:var(--accent-weak); border-color:transparent}
   .pill{display:inline-flex; align-items:center; gap:5px; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:600; font-variant-numeric:tabular-nums}
   .pill::before{content:""; width:6px; height:6px; border-radius:50%; background:currentColor}
   .pill.p-good{color:var(--good); background:var(--good-weak)}
@@ -275,6 +279,7 @@
   <section class="view" id="view-articles">
     <div class="toolbar">
       <div class="seg" id="seg-section" role="group" aria-label="Filtrer par section"></div>
+      <div class="seg" id="seg-lang" role="group" aria-label="Filtrer par langue"></div>
       <span class="count-note" id="art-count"></span>
     </div>
     <div class="table-wrap"><table><thead id="art-head"></thead><tbody id="art-body"></tbody></table></div>
@@ -302,7 +307,7 @@
   <section class="view" id="view-detail">
     <button class="back" id="detail-back">← Retour aux articles</button>
     <div class="detail-hero">
-      <div class="row"><span class="sect" id="d-sect"></span><h2 id="d-title"></h2></div>
+      <div class="row"><span class="sect" id="d-sect"></span><span class="lang" id="d-lang"></span><h2 id="d-title"></h2></div>
       <a class="d-url" id="d-url" target="_blank" rel="noopener"></a>
     </div>
     <div class="kpis" id="d-kpis"></div>
@@ -402,6 +407,8 @@
     (p.includes("/cases"))                                 ? "Case" : "Autre";
   const sectClass = s => s==="News"?"news" : s==="Use case"?"usecase" : s==="Case"?"case" : "blog";
   const SECTION_COLORS = {News:"var(--accent)","Use case":"var(--good)",Blog:"var(--serious)",Case:"var(--warning)"};
+  const langOf = p => p.startsWith("/fr/") ? "FR" : "EN";
+  const langBadge = p => { const l=langOf(p); return `<span class="lang ${l==="FR"?"fr":"en"}" title="${l==="FR"?"Version française":"Version anglaise"}">${l==="FR"?"🇫🇷":"🇬🇧"} ${l}</span>`; };
 
   // Donut SVG (segments = [{label,value,color}])
   function donut(segs, total, mid, sub){
@@ -444,7 +451,7 @@
   // --- État & courant ------------------------------------------------------
   const tip = $("#tip");
   let arts=[], kws=[], pathTitle={};
-  let state = {tab:"overview", sort:{}, secFilter:"Tout", kwQuery:"", detail:null};
+  let state = {tab:"overview", sort:{}, secFilter:"Tout", langFilter:"Tout", kwQuery:"", detail:null};
 
   function makeTable(headEl, bodyEl, cols, getRows, defSort, key){
     if(!state.sort[key]) state.sort[key] = {k:defSort.k, dir:defSort.dir};
@@ -557,6 +564,19 @@
     if(!present.includes(state.secFilter)) state.secFilter="Tout";
     $$("#seg-section button").forEach(b=>b.onclick=()=>{state.secFilter=b.dataset.s;
       $$("#seg-section button").forEach(x=>x.setAttribute("aria-pressed",x===b)); updArtCount(); drawArts&&drawArts();});
+
+    // Language filter — n'apparaît que si les deux langues sont présentes.
+    const byLang={}; arts.forEach(a=>{byLang[a._lang]=(byLang[a._lang]||0)+1;});
+    const langs=["EN","FR"].filter(l=>byLang[l]);
+    const langLabel={EN:"🇬🇧 EN",FR:"🇫🇷 FR"};
+    if(langs.length>1){
+      const opts=["Tout",...langs];
+      $("#seg-lang").hidden=false;
+      $("#seg-lang").innerHTML=opts.map(l=>`<button data-l="${l}" aria-pressed="${l===state.langFilter}">${l==="Tout"?"Tout":langLabel[l]} ${l==="Tout"?"":`<span style="opacity:.6">${byLang[l]}</span>`}</button>`).join("");
+      if(!opts.includes(state.langFilter)) state.langFilter="Tout";
+      $$("#seg-lang button").forEach(b=>b.onclick=()=>{state.langFilter=b.dataset.l;
+        $$("#seg-lang button").forEach(x=>x.setAttribute("aria-pressed",x===b)); updArtCount(); drawArts&&drawArts();});
+    } else { $("#seg-lang").hidden=true; state.langFilter="Tout"; }
     updArtCount();
 
     // Quick wins header
@@ -564,10 +584,11 @@
     $("#n-qw").textContent=wins.length; $("#qw-num").textContent=wins.length;
   }
 
-  function updArtCount(){const n=arts.filter(a=>state.secFilter==="Tout"||a._section===state.secFilter).length; $("#art-count").textContent=`${n} article${n>1?"s":""}`;}
+  const artMatch=a=>(state.secFilter==="Tout"||a._section===state.secFilter)&&(state.langFilter==="Tout"||a._lang===state.langFilter);
+  function updArtCount(){const n=arts.filter(artMatch).length; $("#art-count").textContent=`${n} article${n>1?"s":""}`;}
 
   const artCols=[
-    {k:"title",lbl:"Article",cell:a=>`<span class="cell-main"><span class="sect ${sectClass(a._section)}">${a._section}</span><a class="art-link" data-article="${esc(a.path)}">${esc(a.title)}</a><a class="ext" href="${esc(a.url)}" target="_blank" rel="noopener" title="Voir la page en ligne">↗</a><span class="cell-path">${esc(a.path)}</span></span>`},
+    {k:"title",lbl:"Article",cell:a=>`<span class="cell-main"><span class="sect ${sectClass(a._section)}">${a._section}</span>${langBadge(a.path)}<a class="art-link" data-article="${esc(a.path)}">${esc(a.title)}</a><a class="ext" href="${esc(a.url)}" target="_blank" rel="noopener" title="Voir la page en ligne">↗</a><span class="cell-path">${esc(a.path)}</span></span>`},
     {k:"clicks",lbl:"Clics",cell:a=>fmt(a.clicks)},
     {k:"impressions",lbl:"Impr.",cell:a=>fmt(a.impressions)},
     {k:"ctr",lbl:"CTR",cell:a=>pctCell(a.ctr)},
@@ -578,7 +599,7 @@
   ];
   const kwCols=[
     {k:"kw",lbl:"Mot-clé",cell:w=>`<span class="cell-main">${esc(w.kw)}</span>`},
-    {k:"path",lbl:"Article",cell:w=>`<a class="art-link cell-path" style="max-width:260px" data-article="${esc(w.path)}">${esc(pathTitle[w.path]||w.path)}</a>`},
+    {k:"path",lbl:"Article",cell:w=>`<a class="art-link cell-path" style="max-width:260px" data-article="${esc(w.path)}"><span title="${langOf(w.path)==="FR"?"FR":"EN"}">${langOf(w.path)==="FR"?"🇫🇷":"🇬🇧"}</span> ${esc(pathTitle[w.path]||w.path)}</a>`},
     {k:"clicks",lbl:"Clics",cell:w=>fmt(w.clicks)},
     {k:"impressions",lbl:"Impr.",cell:w=>fmt(w.impressions)},
     {k:"ctr",lbl:"CTR",cell:w=>pctCell(w.ctr)},
@@ -586,7 +607,7 @@
   ];
   const qwCols=[
     {k:"kw",lbl:"Mot-clé",cell:w=>`<span class="cell-main">${esc(w.kw)}</span>`},
-    {k:"path",lbl:"Article",cell:w=>`<a class="art-link cell-path" style="max-width:240px" data-article="${esc(w.path)}">${esc(pathTitle[w.path]||w.path)}</a>`},
+    {k:"path",lbl:"Article",cell:w=>`<a class="art-link cell-path" style="max-width:240px" data-article="${esc(w.path)}"><span title="${langOf(w.path)==="FR"?"FR":"EN"}">${langOf(w.path)==="FR"?"🇫🇷":"🇬🇧"}</span> ${esc(pathTitle[w.path]||w.path)}</a>`},
     {k:"position",lbl:"Position",cell:w=>posPill(w.position)},
     {k:"impressions",lbl:"Impr.",cell:w=>fmt(w.impressions)},
     {k:"clicks",lbl:"Clics",cell:w=>fmt(w.clicks)},
@@ -606,6 +627,8 @@
     state.detail = path;
     $("#d-sect").className = "sect "+sectClass(a._section);
     $("#d-sect").textContent = a._section;
+    $("#d-lang").className = "lang "+(a._lang==="FR"?"fr":"en");
+    $("#d-lang").innerHTML = a._lang==="FR"?"🇫🇷 FR":"🇬🇧 EN";
     $("#d-title").textContent = a.title;
     $("#d-url").href = a.url; $("#d-url").textContent = a.url;
     $("#d-kpis").innerHTML = [
@@ -628,7 +651,7 @@
 
   function buildDrawers(){
     drawArts = makeTable($("#art-head"),$("#art-body"),artCols,
-      ()=>arts.filter(a=>state.secFilter==="Tout"||a._section===state.secFilter),{k:"clicks",dir:-1},"articles");
+      ()=>arts.filter(artMatch),{k:"clicks",dir:-1},"articles");
     drawKw = makeTable($("#kw-head"),$("#kw-body"),kwCols,()=>{
       const q=state.kwQuery.toLowerCase();
       const r=q?kws.filter(w=>w.kw.toLowerCase().includes(q)||(pathTitle[w.path]||w.path).toLowerCase().includes(q)):[...kws];
@@ -641,7 +664,7 @@
   // --- Application d'une période -------------------------------------------
   function apply(key){
     const p = periods.find(x=>x.key===key) || periods[0];
-    arts = (p.articles||[]).map(a=>({...a})); arts.forEach(a=>a._section=sectionOf(a.path));
+    arts = (p.articles||[]).map(a=>({...a})); arts.forEach(a=>{a._section=sectionOf(a.path); a._lang=langOf(a.path);});
     kws = (p.keywords||[]).map(k=>({...k}));
     pathTitle={}; arts.forEach(a=>pathTitle[a.path]=a.title);
     $("#m-range").textContent = p.period || p.label || "";
