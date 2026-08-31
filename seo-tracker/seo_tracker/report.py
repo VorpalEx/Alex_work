@@ -18,7 +18,7 @@ from .ga4 import fetch_page_metrics
 from .google_auth import build_credentials
 from .gsc import fetch_keyword_rows
 from .periods import PERIODS
-from .transform import merge
+from .transform import attach_deltas, merge
 
 logging.basicConfig(
     level=logging.INFO,
@@ -41,24 +41,37 @@ def run(out_dir: Path) -> int:
     # Inventaire Framer : récupéré une seule fois (identique pour toutes les périodes).
     inventory = _fetch_inventory(config, log)
 
-    payloads = []
-    for key, label, days in PERIODS:
-        start = end - timedelta(days=days - 1)
-        log.info("Période %s (%s -> %s)...", label, start, end)
-        keyword_rows = fetch_keyword_rows(credentials, config.gsc_site_url, start, end)
-        page_metrics = fetch_page_metrics(credentials, config.ga4_property_id, start, end)
-        articles = merge(
-            keyword_rows,
-            page_metrics,
+    def _articles(start, end, *, with_inventory):
+        kw = fetch_keyword_rows(credentials, config.gsc_site_url, start, end)
+        pm = fetch_page_metrics(credentials, config.ga4_property_id, start, end)
+        return merge(
+            kw,
+            pm,
             url_regex=config.article_url_regex,
             exclude_regex=config.article_url_exclude,
             min_impressions=config.min_impressions,
             max_keywords_per_article=config.max_keywords_per_article,
-            inventory=inventory,
+            inventory=inventory if with_inventory else None,
         )
+
+    payloads = []
+    for key, label, days in PERIODS:
+        start = end - timedelta(days=days - 1)
+        log.info("Période %s (%s -> %s)...", label, start, end)
+        articles = _articles(start, end, with_inventory=True)
+
+        # Période précédente de même durée, pour la comparaison.
+        prev_end = start - timedelta(days=1)
+        prev_start = prev_end - timedelta(days=days - 1)
+        prev_articles = _articles(prev_start, prev_end, with_inventory=False)
+        attach_deltas(articles, prev_articles)
+
         n_kw = sum(len(a.keywords) for a in articles)
-        log.info("  %d articles, %d mots-clés.", len(articles), n_kw)
-        payloads.append((key, label, start, end, articles))
+        log.info(
+            "  %d articles, %d mots-clés (comparé à %s -> %s).",
+            len(articles), n_kw, prev_start, prev_end,
+        )
+        payloads.append((key, label, start, end, prev_start, prev_end, articles))
 
     data = build_data(payloads, date.today())
     html_path = out_dir / "dashboard.html"

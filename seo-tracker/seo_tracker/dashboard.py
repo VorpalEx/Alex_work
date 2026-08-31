@@ -46,6 +46,12 @@ def _rows(articles: list[ArticleSummary]) -> dict:
             "views": a.views,
             "avg_time": round(a.avg_time_on_page, 1),
             "keyword_count": a.keyword_count,
+            # Variation vs période précédente.
+            "d_clicks": a.d_clicks,
+            "d_impressions": a.d_impressions,
+            "d_views": a.d_views,
+            "d_position": a.d_position,
+            "is_new": a.is_new,
         }
         for a in articles
     ]
@@ -65,23 +71,24 @@ def _rows(articles: list[ArticleSummary]) -> dict:
 
 
 def build_data(
-    period_payloads: list[tuple[str, str, date, date, list[ArticleSummary]]],
+    period_payloads: list[tuple],
     updated: date,
     *,
     default: str = DEFAULT_PERIOD,
 ) -> dict:
     """Construit le dict JSON multi-périodes attendu par le template.
 
-    period_payloads : liste de (clé, libellé, start, end, articles).
+    period_payloads : liste de (clé, libellé, start, end, prev_start, prev_end, articles).
     """
     periods = [
         {
             "key": key,
             "label": label,
             "period": f"{_fr_date(start)} – {_fr_date(end)}",
+            "prev_period": f"{_fr_date(prev_start)} – {_fr_date(prev_end)}",
             **_rows(articles),
         }
-        for key, label, start, end, articles in period_payloads
+        for key, label, start, end, prev_start, prev_end, articles in period_payloads
     ]
     keys = {p["key"] for p in periods}
     return {
