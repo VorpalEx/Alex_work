@@ -178,6 +178,12 @@
     margin-right:7px; vertical-align:1px; border:1px solid var(--border-strong)}
   .lang.en{color:var(--ink-2); background:var(--surface-2)}
   .lang.fr{color:var(--accent-ink); background:var(--accent-weak); border-color:transparent}
+  .delta{display:block; font-size:10.5px; font-weight:600; margin-top:2px; font-variant-numeric:tabular-nums; white-space:nowrap}
+  .delta.up{color:var(--good)}
+  .delta.down{color:var(--critical)}
+  .delta.new{color:var(--accent-ink)}
+  .cmp-note{font-size:11.5px; color:var(--muted); margin:-4px 0 14px 2px}
+  .cmp-note b{color:var(--ink-2); font-weight:600}
   .pill{display:inline-flex; align-items:center; gap:5px; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:600; font-variant-numeric:tabular-nums}
   .pill::before{content:""; width:6px; height:6px; border-radius:50%; background:currentColor}
   .pill.p-good{color:var(--good); background:var(--good-weak)}
@@ -247,6 +253,7 @@
 <main>
   <section class="view active" id="view-overview">
     <div class="kpis" id="kpis"></div>
+    <div class="cmp-note" id="cmp-note" hidden></div>
 
     <div class="cols">
       <div class="panel">
@@ -442,6 +449,13 @@
   const SECTION_COLORS = {News:"var(--accent)","Use case":"var(--good)",Blog:"var(--serious)",Case:"var(--warning)"};
   const langOf = p => p.startsWith("/fr/") ? "FR" : "EN";
   const langBadge = p => { const l=langOf(p); return `<span class="lang ${l==="FR"?"fr":"en"}" title="${l==="FR"?"Version française":"Version anglaise"}">${l==="FR"?"🇫🇷":"🇬🇧"} ${l}</span>`; };
+  // Variation vs période précédente. Positif = progression (▲ vert), négatif = recul (▼ rouge).
+  const dlt = (v,{dec=0}={}) => {
+    if(v==null || v===0 || Number.isNaN(v)) return "";
+    const up=v>0, val=dec?Math.abs(v).toLocaleString("fr-FR",{minimumFractionDigits:dec,maximumFractionDigits:dec}):fmt(Math.abs(v));
+    return `<span class="delta ${up?"up":"down"}" title="vs période précédente">${up?"▲":"▼"} ${val}</span>`;
+  };
+  const newBadge = `<span class="delta new" title="Nouveau sur cette période">• nouv.</span>`;
 
   // Donut SVG (segments = [{label,value,color}])
   function donut(segs, total, mid, sub){
@@ -524,15 +538,16 @@
     const tot=(k)=>arts.reduce((s,x)=>s+(x[k]||0),0);
     const totClicks=tot("clicks"), totImpr=tot("impressions"), totViews=tot("views");
     const wPos = totImpr?arts.reduce((s,a)=>s+a.position*a.impressions,0)/totImpr:0;
+    const hasCmp = arts.some(a=>a.d_clicks!=null && (a.d_clicks||a.d_impressions||a.is_new));
     $("#kpis").innerHTML = [
       {lbl:"Articles suivis", val:fmt(arts.length), sub:"pages positionnées", src:"GSC"},
       {lbl:"Mots-clés", val:fmt(kws.length), sub:"requêtes positionnées", src:"GSC", accent:true},
-      {lbl:"Clics", val:fmt(totClicks), sub:"cumulés", src:"GSC"},
-      {lbl:"Impressions", val:fmt(totImpr), sub:"cumulées", src:"GSC"},
+      {lbl:"Clics", val:fmt(totClicks), sub:"cumulés", src:"GSC", d:hasCmp?tot("d_clicks"):null},
+      {lbl:"Impressions", val:fmt(totImpr), sub:"cumulées", src:"GSC", d:hasCmp?tot("d_impressions"):null},
       {lbl:"Position moy.", val:wPos?pos(wPos):"—", sub:"pondérée impressions", src:"GSC"},
-      {lbl:"Vues", val:fmt(totViews), sub:"pages vues", src:"GA4"}
+      {lbl:"Vues", val:fmt(totViews), sub:"pages vues", src:"GA4", d:hasCmp?tot("d_views"):null}
     ].map(k=>`<div class="kpi${k.accent?' accent':''}"><div class="lbl">${k.lbl}</div>
-      <div class="val tnum">${k.val}</div><div class="sub">${k.sub}</div><div class="src">${k.src}</div></div>`).join("");
+      <div class="val tnum">${k.val}</div>${k.d!=null?dlt(k.d):""}<div class="sub">${k.sub}</div><div class="src">${k.src}</div></div>`).join("");
 
     const secColors = SECTION_COLORS;
 
@@ -627,11 +642,11 @@
 
   const artCols=[
     {k:"title",lbl:"Article",cell:a=>`<span class="cell-main"><span class="sect ${sectClass(a._section)}">${a._section}</span>${langBadge(a.path)}<a class="art-link" data-article="${esc(a.path)}">${esc(a.title)}</a><a class="ext" href="${esc(a.url)}" target="_blank" rel="noopener" title="Voir la page en ligne">↗</a><span class="cell-path">${esc(a.path)}</span></span>`},
-    {k:"clicks",lbl:"Clics",cell:a=>fmt(a.clicks)},
-    {k:"impressions",lbl:"Impr.",cell:a=>fmt(a.impressions)},
+    {k:"clicks",lbl:"Clics",cell:a=>`${fmt(a.clicks)}${a.is_new?newBadge:dlt(a.d_clicks)}`},
+    {k:"impressions",lbl:"Impr.",cell:a=>`${fmt(a.impressions)}${a.is_new?"":dlt(a.d_impressions)}`},
     {k:"ctr",lbl:"CTR",cell:a=>pctCell(a.ctr)},
-    {k:"position",lbl:"Position",cell:a=>posPill(a.position)},
-    {k:"views",lbl:"Vues",cell:a=>fmt(a.views)},
+    {k:"position",lbl:"Position",cell:a=>`${posPill(a.position)}${a.is_new?"":dlt(a.d_position,{dec:1})}`},
+    {k:"views",lbl:"Vues",cell:a=>`${fmt(a.views)}${a.is_new?"":dlt(a.d_views)}`},
     {k:"avg_time",lbl:"Tps moy.",cell:a=>a.avg_time>0?secs(a.avg_time):dash},
     {k:"keyword_count",lbl:"Mots-clés",cell:a=>fmt(a.keyword_count)}
   ];
@@ -669,15 +684,16 @@
     $("#d-lang").innerHTML = a._lang==="FR"?"🇫🇷 FR":"🇬🇧 EN";
     $("#d-title").textContent = a.title;
     $("#d-url").href = a.url; $("#d-url").textContent = a.url;
+    const nw = a.is_new;
     $("#d-kpis").innerHTML = [
-      {lbl:"Position moy.", val: a.position>0?`P${pageOf(a.position)} · ${pos(a.position)}`:"—", accent:true},
-      {lbl:"Clics", val: fmt(a.clicks)},
-      {lbl:"Impressions", val: fmt(a.impressions)},
+      {lbl:"Position moy.", val: a.position>0?`P${pageOf(a.position)} · ${pos(a.position)}`:"—", accent:true, d:nw?null:dlt(a.d_position,{dec:1})},
+      {lbl:"Clics", val: fmt(a.clicks), d:nw?newBadge:dlt(a.d_clicks)},
+      {lbl:"Impressions", val: fmt(a.impressions), d:nw?"":dlt(a.d_impressions)},
       {lbl:"CTR", val: a.ctr>0?pct(a.ctr):"—"},
-      {lbl:"Vues", val: fmt(a.views), src:"GA4"},
+      {lbl:"Vues", val: fmt(a.views), src:"GA4", d:nw?"":dlt(a.d_views)},
       {lbl:"Temps moyen", val: a.avg_time>0?secs(a.avg_time):"—", src:"GA4"}
     ].map(k=>`<div class="kpi${k.accent?' accent':''}"><div class="lbl">${k.lbl}</div>
-      <div class="val tnum">${k.val}</div><div class="src">${k.src||"GSC"}</div></div>`).join("");
+      <div class="val tnum">${k.val}</div>${k.d||""}<div class="src">${k.src||"GSC"}</div></div>`).join("");
     const n = kws.filter(k=>k.path===path).length;
     $("#d-kwnote").textContent = n?`${n} mot${n>1?"s":""}-clé${n>1?"s":""} positionné${n>1?"s":""}`:"aucun mot-clé positionné sur la période";
     const draw = makeTable($("#d-head"),$("#d-body"),detailKwCols,()=>kws.filter(k=>k.path===path),{k:"impressions",dir:-1},"detail");
@@ -700,15 +716,16 @@
     const wPos=tImpr?arts_s.reduce((s,a)=>s+a.position*a.impressions,0)/tImpr:0;
     const enN=arts_s.filter(a=>a._lang==="EN").length, frN=arts_s.filter(a=>a._lang==="FR").length;
     $("#s-sub").textContent = `${arts_s.length} article${arts_s.length>1?"s":""} · 🇬🇧 ${enN} / 🇫🇷 ${frN}`;
+    const cmp = arts_s.some(a=>a.d_clicks!=null);
     $("#s-kpis").innerHTML = [
       {lbl:"Articles", val:fmt(arts_s.length)},
       {lbl:"Mots-clés", val:fmt(kws_s.length), accent:true},
-      {lbl:"Clics", val:fmt(sum(arts_s,"clicks"))},
-      {lbl:"Impressions", val:fmt(tImpr)},
+      {lbl:"Clics", val:fmt(sum(arts_s,"clicks")), d:cmp?dlt(sum(arts_s,"d_clicks")):""},
+      {lbl:"Impressions", val:fmt(tImpr), d:cmp?dlt(sum(arts_s,"d_impressions")):""},
       {lbl:"Position moy.", val:wPos?pos(wPos):"—"},
-      {lbl:"Vues", val:fmt(sum(arts_s,"views")), src:"GA4"}
+      {lbl:"Vues", val:fmt(sum(arts_s,"views")), src:"GA4", d:cmp?dlt(sum(arts_s,"d_views")):""}
     ].map(k=>`<div class="kpi${k.accent?' accent':''}"><div class="lbl">${k.lbl}</div>
-      <div class="val tnum">${k.val}</div><div class="src">${k.src||"GSC"}</div></div>`).join("");
+      <div class="val tnum">${k.val}</div>${k.d||""}<div class="src">${k.src||"GSC"}</div></div>`).join("");
     $("#s-posnote").textContent = kws_s.length?fmt(kws_s.length)+" mots-clés":"";
     renderPosBuckets($("#s-posbuckets"), kws_s);
     makeTable($("#s-arthead"),$("#s-artbody"),artCols,()=>arts_s,{k:"impressions",dir:-1},"sectionArts")();
@@ -739,6 +756,11 @@
     kws = (p.keywords||[]).map(k=>({...k}));
     pathTitle={}; arts.forEach(a=>pathTitle[a.path]=a.title);
     $("#m-range").textContent = p.period || p.label || "";
+    const cmp=$("#cmp-note");
+    if(p.prev_period && arts.some(a=>a.d_clicks!=null)){
+      cmp.hidden=false;
+      cmp.innerHTML=`<b>▲▼</b> = variation vs la période précédente (<b>${esc(p.prev_period)}</b>).`;
+    } else cmp.hidden=true;
     $("#n-art").textContent = arts.length;
     $("#n-kw").textContent = kws.length;
     renderStatic();

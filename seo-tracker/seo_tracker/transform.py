@@ -38,6 +38,12 @@ class ArticleSummary:
     avg_time_on_page: float = 0.0
     conversions: float = 0.0
     keywords: list[KeywordEntry] = field(default_factory=list)
+    # Comparaison avec la période précédente (variation ; None/False si non calculée).
+    d_clicks: int = 0
+    d_impressions: int = 0
+    d_views: int = 0
+    d_position: float | None = None  # positif = progression (position qui remonte)
+    is_new: bool = False             # absent de la période précédente
 
 
 def normalize_path(url_or_path: str) -> str:
@@ -165,3 +171,33 @@ def merge(
 
     articles.sort(key=lambda a: a.clicks, reverse=True)
     return articles
+
+
+def attach_deltas(
+    current: list[ArticleSummary],
+    previous: list[ArticleSummary],
+) -> None:
+    """Attache à chaque article courant sa variation vs la période précédente.
+
+    Comparaison par chemin canonique. Pour la position, un delta positif = une
+    progression (la page remonte dans les résultats). `is_new` = article absent
+    de la période précédente.
+    """
+    prev_by_path = {a.path: a for a in previous}
+    for a in current:
+        p = prev_by_path.get(a.path)
+        if p is None:
+            a.is_new = True
+            a.d_clicks = a.clicks
+            a.d_impressions = a.impressions
+            a.d_views = a.views
+            a.d_position = None
+            continue
+        a.d_clicks = a.clicks - p.clicks
+        a.d_impressions = a.impressions - p.impressions
+        a.d_views = a.views - p.views
+        # Position : plus petit = mieux, donc progression = position précédente - actuelle.
+        if a.avg_position > 0 and p.avg_position > 0:
+            a.d_position = round(p.avg_position - a.avg_position, 1)
+        else:
+            a.d_position = None
