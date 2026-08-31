@@ -133,14 +133,15 @@ def write_csv(data: dict, out_dir: Path) -> None:
     art_fields = [
         "title", "url", "path", "clicks", "impressions", "ctr",
         "position", "views", "avg_time", "keyword_count",
+        "d_clicks", "d_impressions", "d_views", "d_position", "is_new",
     ]
     with (out_dir / "articles.csv").open("w", newline="", encoding="utf-8-sig") as f:
-        w = csv.DictWriter(f, fieldnames=art_fields, delimiter=";")
+        w = csv.DictWriter(f, fieldnames=art_fields, delimiter=";", extrasaction="ignore")
         w.writeheader()
         w.writerows(rows.get("articles", []))
 
     kw_fields = ["kw", "path", "clicks", "impressions", "ctr", "position"]
     with (out_dir / "keywords.csv").open("w", newline="", encoding="utf-8-sig") as f:
-        w = csv.DictWriter(f, fieldnames=kw_fields, delimiter=";")
+        w = csv.DictWriter(f, fieldnames=kw_fields, delimiter=";", extrasaction="ignore")
         w.writeheader()
         w.writerows(rows.get("keywords", []))
