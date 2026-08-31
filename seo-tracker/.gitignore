@@ -10,6 +10,7 @@ framer_inventory.json
 
 # Dashboards générés avec de vraies données (ne jamais committer sur repo public)
 dashboard/live.html
+dashboard/preview.html
 out/
 
 # Python
