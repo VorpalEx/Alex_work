@@ -395,7 +395,11 @@
   const posPill = p=>{ if(!p||p<=0) return dash; const c=p<=3?"p-good":p<=10?"p-warn":p<=20?"p-ser":"p-crit";
     return `<span class="pill ${c} tnum" title="Position moyenne ${pos(p)} · page ${pageOf(p)}">P${pageOf(p)}&nbsp;·&nbsp;${pos(p)}</span>`;};
   const pctCell = v=>(!v||v<=0)?dash:pct(v);
-  const sectionOf = p => p.includes("/news")?"News" : p.includes("/use-case")?"Use case" : p.includes("/blog")?"Blog" : p.includes("/cases")?"Case" : "Autre";
+  const sectionOf = p =>
+    (p.includes("/news")||p.includes("/actualites"))       ? "News" :
+    (p.includes("/use-case")||p.includes("/cas-d-usage"))  ? "Use case" :
+    (p.includes("/blog"))                                  ? "Blog" :
+    (p.includes("/cases"))                                 ? "Case" : "Autre";
   const sectClass = s => s==="News"?"news" : s==="Use case"?"usecase" : s==="Case"?"case" : "blog";
   const SECTION_COLORS = {News:"var(--accent)","Use case":"var(--good)",Blog:"var(--serious)",Case:"var(--warning)"};
 
