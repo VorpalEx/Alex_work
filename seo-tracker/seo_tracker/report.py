@@ -61,24 +61,28 @@ def run(out_dir: Path) -> int:
         start = end - timedelta(days=days - 1)
         log.info("Période %s (%s -> %s)...", label, start, end)
         articles = _articles(start, end, with_inventory=True, with_sources=True)
-        audience = fetch_audience(credentials, config.ga4_property_id, start, end)
+        prop = config.ga4_property_id
+        audience = fetch_audience(credentials, prop, start, end)
+        audience_org = fetch_audience(credentials, prop, start, end, channel="Organic Search")
 
         # Période précédente de même durée, pour la comparaison.
         prev_end = start - timedelta(days=1)
         prev_start = prev_end - timedelta(days=days - 1)
         prev_articles = _articles(prev_start, prev_end, with_inventory=False)
-        prev_audience = fetch_audience(
-            credentials, config.ga4_property_id, prev_start, prev_end, totals_only=True
+        prev_audience = fetch_audience(credentials, prop, prev_start, prev_end, totals_only=True)
+        prev_audience_org = fetch_audience(
+            credentials, prop, prev_start, prev_end, totals_only=True, channel="Organic Search"
         )
         attach_deltas(articles, prev_articles)
 
         n_kw = sum(len(a.keywords) for a in articles)
         log.info(
-            "  %d articles, %d mots-clés, %d utilisateurs (comparé à %s -> %s).",
-            len(articles), n_kw, audience.total_users, prev_start, prev_end,
+            "  %d articles, %d mots-clés, %d utilisateurs (dont %d organiques) (comparé à %s -> %s).",
+            len(articles), n_kw, audience.total_users, audience_org.total_users, prev_start, prev_end,
         )
         payloads.append(
-            (key, label, start, end, prev_start, prev_end, articles, audience, prev_audience)
+            (key, label, start, end, prev_start, prev_end, articles,
+             audience, prev_audience, audience_org, prev_audience_org)
         )
 
     data = build_data(payloads, date.today())
