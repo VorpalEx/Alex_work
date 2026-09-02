@@ -35,6 +35,7 @@ class ArticleSummary:
     best_keyword: str = ""
     # GA4
     views: int = 0
+    users: int = 0
     avg_time_on_page: float = 0.0
     conversions: float = 0.0
     keywords: list[KeywordEntry] = field(default_factory=list)
@@ -124,6 +125,7 @@ def merge(
             keyword_count=len(rows),
             best_keyword=best.query,
             views=ga4.views if ga4 else 0,
+            users=ga4.users if ga4 else 0,
             avg_time_on_page=ga4.avg_time_on_page if ga4 else 0.0,
             conversions=ga4.conversions if ga4 else 0.0,
             keywords=[
@@ -163,6 +165,7 @@ def merge(
                 keyword_count=0,
                 best_keyword="",
                 views=ga4.views if ga4 else 0,
+                users=ga4.users if ga4 else 0,
                 avg_time_on_page=ga4.avg_time_on_page if ga4 else 0.0,
                 conversions=ga4.conversions if ga4 else 0.0,
                 keywords=[],
