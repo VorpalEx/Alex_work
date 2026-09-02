@@ -44,6 +44,7 @@ def _rows(articles: list[ArticleSummary]) -> dict:
             "ctr": round(a.ctr, 4),
             "position": round(a.avg_position, 1),
             "views": a.views,
+            "users": a.users,
             "avg_time": round(a.avg_time_on_page, 1),
             "keyword_count": a.keyword_count,
             # Variation vs période précédente.
@@ -159,7 +160,7 @@ def write_csv(data: dict, out_dir: Path) -> None:
 
     art_fields = [
         "title", "url", "path", "clicks", "impressions", "ctr",
-        "position", "views", "avg_time", "keyword_count",
+        "position", "views", "users", "avg_time", "keyword_count",
         "d_clicks", "d_impressions", "d_views", "d_position", "is_new",
     ]
     with (out_dir / "articles.csv").open("w", newline="", encoding="utf-8-sig") as f:

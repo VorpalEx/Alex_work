@@ -22,6 +22,7 @@ class PageMetrics:
     views: int
     avg_time_on_page: float  # secondes (engagement / vues)
     conversions: float
+    users: int = 0     # utilisateurs (totalUsers) de la page
 
 
 @dataclass
@@ -45,7 +46,7 @@ class Audience:
 
 # Métriques demandées. 'conversions' peut ne pas exister selon la config GA4
 # (remplacé par 'keyEvents') : on retente sans si l'API la refuse.
-_BASE_METRICS = ["screenPageViews", "userEngagementDuration"]
+_BASE_METRICS = ["screenPageViews", "userEngagementDuration", "totalUsers"]
 _CONVERSION_METRICS = ["conversions", "keyEvents"]
 
 
@@ -94,13 +95,15 @@ def fetch_page_metrics(
         values = [mv.value for mv in row.metric_values]
         views = int(float(values[0] or 0))
         engagement = float(values[1] or 0.0)
-        conversions = float(values[2]) if conversion_metric and len(values) > 2 else 0.0
+        users = int(float(values[2] or 0))
+        conversions = float(values[3]) if conversion_metric and len(values) > 3 else 0.0
         avg_time = (engagement / views) if views else 0.0
         result[path] = PageMetrics(
             path=path,
             views=views,
             avg_time_on_page=round(avg_time, 1),
             conversions=conversions,
+            users=users,
         )
     return result
 
