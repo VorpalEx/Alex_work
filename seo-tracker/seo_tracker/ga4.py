@@ -24,6 +24,25 @@ class PageMetrics:
     conversions: float
 
 
+@dataclass
+class Audience:
+    """Données d'audience GA4 pour tout le site, sur une période."""
+    total_users: int = 0
+    new_users: int = 0
+    sessions: int = 0
+    views: int = 0
+    engagement_rate: float = 0.0        # ratio 0..1
+    avg_session_duration: float = 0.0   # secondes
+    by_device: list = None              # [(appareil, utilisateurs)]
+    by_country: list = None             # [(pays, utilisateurs)]
+    by_channel: list = None             # [(canal, sessions)]
+
+    def __post_init__(self):
+        self.by_device = self.by_device or []
+        self.by_country = self.by_country or []
+        self.by_channel = self.by_channel or []
+
+
 # Métriques demandées. 'conversions' peut ne pas exister selon la config GA4
 # (remplacé par 'keyEvents') : on retente sans si l'API la refuse.
 _BASE_METRICS = ["screenPageViews", "userEngagementDuration"]
@@ -84,3 +103,77 @@ def fetch_page_metrics(
             conversions=conversions,
         )
     return result
+
+
+def _breakdown(
+    client: BetaAnalyticsDataClient,
+    property_id: str,
+    start: date,
+    end: date,
+    dimension: str,
+    metric: str,
+    limit: int = 25,
+) -> list[tuple[str, int]]:
+    """Retourne [(valeur_dimension, valeur_métrique)] trié décroissant."""
+    request = RunReportRequest(
+        property=f"properties/{property_id}",
+        date_ranges=[DateRange(start_date=start.isoformat(), end_date=end.isoformat())],
+        dimensions=[Dimension(name=dimension)],
+        metrics=[Metric(name=metric)],
+        limit=limit,
+    )
+    resp = client.run_report(request)
+    rows = [
+        (r.dimension_values[0].value or "(non défini)", int(float(r.metric_values[0].value or 0)))
+        for r in resp.rows
+    ]
+    rows.sort(key=lambda x: x[1], reverse=True)
+    return rows
+
+
+def fetch_audience(
+    credentials: Credentials,
+    property_id: str,
+    start: date,
+    end: date,
+    *,
+    totals_only: bool = False,
+) -> Audience:
+    """Audience GA4 de tout le site : totaux + répartitions appareil/pays/canal.
+
+    `totals_only` : ne récupère que les totaux (utile pour la période de
+    comparaison, où seuls les deltas globaux sont nécessaires).
+    """
+    client = BetaAnalyticsDataClient(credentials=credentials)
+
+    # Totaux (sans dimension).
+    totals_req = RunReportRequest(
+        property=f"properties/{property_id}",
+        date_ranges=[DateRange(start_date=start.isoformat(), end_date=end.isoformat())],
+        metrics=[
+            Metric(name="totalUsers"),
+            Metric(name="newUsers"),
+            Metric(name="sessions"),
+            Metric(name="screenPageViews"),
+            Metric(name="engagementRate"),
+            Metric(name="averageSessionDuration"),
+        ],
+    )
+    tr = client.run_report(totals_req)
+    aud = Audience()
+    if tr.rows:
+        v = [mv.value for mv in tr.rows[0].metric_values]
+        aud.total_users = int(float(v[0] or 0))
+        aud.new_users = int(float(v[1] or 0))
+        aud.sessions = int(float(v[2] or 0))
+        aud.views = int(float(v[3] or 0))
+        aud.engagement_rate = round(float(v[4] or 0.0), 4)
+        aud.avg_session_duration = round(float(v[5] or 0.0), 1)
+
+    if not totals_only:
+        aud.by_device = _breakdown(client, property_id, start, end, "deviceCategory", "totalUsers", limit=10)
+        aud.by_country = _breakdown(client, property_id, start, end, "country", "totalUsers", limit=8)
+        aud.by_channel = _breakdown(
+            client, property_id, start, end, "sessionDefaultChannelGroup", "sessions", limit=10
+        )
+    return aud
