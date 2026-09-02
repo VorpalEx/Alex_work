@@ -108,6 +108,35 @@ def fetch_page_metrics(
     return result
 
 
+def fetch_page_sources(
+    credentials: Credentials,
+    property_id: str,
+    start: date,
+    end: date,
+) -> dict[str, list[tuple[str, int]]]:
+    """Sources de trafic par page : {chemin -> [(canal, sessions), ...]} trié décroissant."""
+    client = BetaAnalyticsDataClient(credentials=credentials)
+    request = RunReportRequest(
+        property=f"properties/{property_id}",
+        date_ranges=[DateRange(start_date=start.isoformat(), end_date=end.isoformat())],
+        dimensions=[Dimension(name="pagePath"), Dimension(name="sessionDefaultChannelGroup")],
+        metrics=[Metric(name="sessions")],
+        limit=250000,
+    )
+    resp = client.run_report(request)
+    by_path: dict[str, list[tuple[str, int]]] = {}
+    for r in resp.rows:
+        path = r.dimension_values[0].value
+        channel = r.dimension_values[1].value or "(non défini)"
+        sessions = int(float(r.metric_values[0].value or 0))
+        if sessions <= 0:
+            continue
+        by_path.setdefault(path, []).append((channel, sessions))
+    for path in by_path:
+        by_path[path].sort(key=lambda x: x[1], reverse=True)
+    return by_path
+
+
 def _breakdown(
     client: BetaAnalyticsDataClient,
     property_id: str,

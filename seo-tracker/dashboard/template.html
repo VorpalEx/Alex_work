@@ -363,6 +363,10 @@
         <div class="pnote" style="margin-top:10px">Indicatif : les clics viennent de Google (SEO) tandis que vues et utilisateurs incluent tout le trafic — les étapes ne s'enchaînent donc pas de façon stricte.</div>
       </div>
     </div>
+    <div class="panel" style="margin-bottom:14px">
+      <div class="phead"><h2>Sources de trafic de cet article</h2><span class="pnote">sessions · GA4</span></div>
+      <div class="pbody"><div class="breakdown" id="d-sources"></div></div>
+    </div>
     <div class="panel">
       <div class="phead"><h2>Mots-clés de cet article</h2><span class="pnote" id="d-kwnote"></span></div>
       <div class="pbody" style="padding-top:4px">
@@ -769,6 +773,7 @@
       {label:"Vues",        value:a.views||0,       color:"var(--good)"},
       {label:"Utilisateurs",value:a.users||0,       color:"var(--warning)"},
     ]);
+    hbars($("#d-sources"), a.sources, "var(--good)");
     const n = kws.filter(k=>k.path===path).length;
     $("#d-kwnote").textContent = n?`${n} mot${n>1?"s":""}-clé${n>1?"s":""} positionné${n>1?"s":""}`:"aucun mot-clé positionné sur la période";
     const draw = makeTable($("#d-head"),$("#d-body"),detailKwCols,()=>kws.filter(k=>k.path===path),{k:"impressions",dir:-1},"detail");
