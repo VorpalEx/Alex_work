@@ -70,6 +70,29 @@ def _rows(articles: list[ArticleSummary]) -> dict:
     return {"articles": art_rows, "keywords": kw_rows}
 
 
+def _audience_block(aud, prev) -> dict:
+    """Sérialise l'audience GA4 (+ deltas vs période précédente) pour le JSON."""
+    if aud is None:
+        return {}
+    d = {
+        "total_users": aud.total_users,
+        "new_users": aud.new_users,
+        "sessions": aud.sessions,
+        "views": aud.views,
+        "engagement_rate": aud.engagement_rate,
+        "avg_session_duration": aud.avg_session_duration,
+        "by_device": [[k, v] for k, v in (aud.by_device or [])],
+        "by_country": [[k, v] for k, v in (aud.by_country or [])],
+        "by_channel": [[k, v] for k, v in (aud.by_channel or [])],
+    }
+    if prev is not None:
+        d["d_total_users"] = aud.total_users - prev.total_users
+        d["d_new_users"] = aud.new_users - prev.new_users
+        d["d_sessions"] = aud.sessions - prev.sessions
+        d["d_views"] = aud.views - prev.views
+    return d
+
+
 def build_data(
     period_payloads: list[tuple],
     updated: date,
@@ -78,18 +101,22 @@ def build_data(
 ) -> dict:
     """Construit le dict JSON multi-périodes attendu par le template.
 
-    period_payloads : liste de (clé, libellé, start, end, prev_start, prev_end, articles).
+    period_payloads : liste de
+    (clé, libellé, start, end, prev_start, prev_end, articles[, audience, prev_audience]).
     """
-    periods = [
-        {
+    periods = []
+    for p in period_payloads:
+        key, label, start, end, prev_start, prev_end, articles = p[:7]
+        audience = p[7] if len(p) > 7 else None
+        prev_audience = p[8] if len(p) > 8 else None
+        periods.append({
             "key": key,
             "label": label,
             "period": f"{_fr_date(start)} – {_fr_date(end)}",
             "prev_period": f"{_fr_date(prev_start)} – {_fr_date(prev_end)}",
+            "audience": _audience_block(audience, prev_audience),
             **_rows(articles),
-        }
-        for key, label, start, end, prev_start, prev_end, articles in period_payloads
-    ]
+        })
     keys = {p["key"] for p in periods}
     return {
         "meta": {
