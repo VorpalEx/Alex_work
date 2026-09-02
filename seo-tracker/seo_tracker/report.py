@@ -14,7 +14,7 @@ from pathlib import Path
 from .config import Config, ConfigError
 from .dashboard import build_data, write_csv, write_dashboard
 from .framer import fetch_inventory_or_empty as _fetch_inventory
-from .ga4 import fetch_audience, fetch_page_metrics
+from .ga4 import fetch_audience, fetch_page_metrics, fetch_page_sources
 from .google_auth import build_credentials
 from .gsc import fetch_keyword_rows
 from .periods import PERIODS
@@ -41,9 +41,10 @@ def run(out_dir: Path) -> int:
     # Inventaire Framer : récupéré une seule fois (identique pour toutes les périodes).
     inventory = _fetch_inventory(config, log)
 
-    def _articles(start, end, *, with_inventory):
+    def _articles(start, end, *, with_inventory, with_sources=False):
         kw = fetch_keyword_rows(credentials, config.gsc_site_url, start, end)
         pm = fetch_page_metrics(credentials, config.ga4_property_id, start, end)
+        srcs = fetch_page_sources(credentials, config.ga4_property_id, start, end) if with_sources else None
         return merge(
             kw,
             pm,
@@ -52,13 +53,14 @@ def run(out_dir: Path) -> int:
             min_impressions=config.min_impressions,
             max_keywords_per_article=config.max_keywords_per_article,
             inventory=inventory if with_inventory else None,
+            page_sources=srcs,
         )
 
     payloads = []
     for key, label, days in PERIODS:
         start = end - timedelta(days=days - 1)
         log.info("Période %s (%s -> %s)...", label, start, end)
-        articles = _articles(start, end, with_inventory=True)
+        articles = _articles(start, end, with_inventory=True, with_sources=True)
         audience = fetch_audience(credentials, config.ga4_property_id, start, end)
 
         # Période précédente de même durée, pour la comparaison.

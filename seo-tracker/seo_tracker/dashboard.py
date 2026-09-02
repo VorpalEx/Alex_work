@@ -53,6 +53,7 @@ def _rows(articles: list[ArticleSummary]) -> dict:
             "d_views": a.d_views,
             "d_position": a.d_position,
             "is_new": a.is_new,
+            "sources": [[c, s] for c, s in (a.sources or [])],
         }
         for a in articles
     ]

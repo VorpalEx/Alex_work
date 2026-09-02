@@ -45,6 +45,7 @@ class ArticleSummary:
     d_views: int = 0
     d_position: float | None = None  # positif = progression (position qui remonte)
     is_new: bool = False             # absent de la période précédente
+    sources: list = field(default_factory=list)  # [(canal, sessions)] GA4, cet article
 
 
 def normalize_path(url_or_path: str) -> str:
@@ -64,16 +65,21 @@ def merge(
     min_impressions: int = 1,
     max_keywords_per_article: int = 0,
     inventory: list | None = None,
+    page_sources: dict | None = None,
 ) -> list[ArticleSummary]:
     """Construit une liste d'ArticleSummary (avec leurs mots-clés) triée par clics.
 
     `inventory` (optionnel) : liste d'objets ayant .path/.url/.title (ex. FramerArticle).
     Chaque article de l'inventaire apparaît dans le résultat, même sans trafic
     (métriques à 0). Fournit aussi le vrai titre des pages.
+    `page_sources` (optionnel) : {chemin -> [(canal, sessions)]} pour les sources par article.
     """
     # GA4 indexé par chemin normalisé.
     ga4_by_path: dict[str, PageMetrics] = {
         normalize_path(p): m for p, m in page_metrics.items()
+    }
+    sources_by_path: dict[str, list] = {
+        normalize_path(p): v for p, v in (page_sources or {}).items()
     }
     # Inventaire indexé par chemin normalisé — y compris les alias (slugs FR/EN),
     # pour que la jointure GSC/GA4 fonctionne quel que soit le slug live.
@@ -128,6 +134,7 @@ def merge(
             users=ga4.users if ga4 else 0,
             avg_time_on_page=ga4.avg_time_on_page if ga4 else 0.0,
             conversions=ga4.conversions if ga4 else 0.0,
+            sources=list(sources_by_path.get(path, [])),
             keywords=[
                 KeywordEntry(
                     query=r.query,
@@ -153,6 +160,7 @@ def merge(
         path = normalize_path(inv.path)
         seen.add(path)
         ga4 = next((ga4_by_path[c] for c in candidates if c in ga4_by_path), None)
+        src = next((sources_by_path[c] for c in candidates if c in sources_by_path), [])
         articles.append(
             ArticleSummary(
                 url=getattr(inv, "url", ""),
@@ -168,6 +176,7 @@ def merge(
                 users=ga4.users if ga4 else 0,
                 avg_time_on_page=ga4.avg_time_on_page if ga4 else 0.0,
                 conversions=ga4.conversions if ga4 else 0.0,
+                sources=list(src),
                 keywords=[],
             )
         )
