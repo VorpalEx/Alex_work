@@ -9,6 +9,8 @@ from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from google.analytics.data_v1beta.types import (
     DateRange,
     Dimension,
+    Filter,
+    FilterExpression,
     Metric,
     RunReportRequest,
 )
@@ -137,6 +139,17 @@ def fetch_page_sources(
     return by_path
 
 
+def _channel_filter(channel: str | None) -> "FilterExpression | None":
+    if not channel:
+        return None
+    return FilterExpression(
+        filter=Filter(
+            field_name="sessionDefaultChannelGroup",
+            string_filter=Filter.StringFilter(value=channel),
+        )
+    )
+
+
 def _breakdown(
     client: BetaAnalyticsDataClient,
     property_id: str,
@@ -145,6 +158,7 @@ def _breakdown(
     dimension: str,
     metric: str,
     limit: int = 25,
+    dimension_filter=None,
 ) -> list[tuple[str, int]]:
     """Retourne [(valeur_dimension, valeur_métrique)] trié décroissant."""
     request = RunReportRequest(
@@ -152,6 +166,7 @@ def _breakdown(
         date_ranges=[DateRange(start_date=start.isoformat(), end_date=end.isoformat())],
         dimensions=[Dimension(name=dimension)],
         metrics=[Metric(name=metric)],
+        dimension_filter=dimension_filter,
         limit=limit,
     )
     resp = client.run_report(request)
@@ -170,15 +185,20 @@ def fetch_audience(
     end: date,
     *,
     totals_only: bool = False,
+    channel: str | None = None,
 ) -> Audience:
     """Audience GA4 de tout le site : totaux + répartitions appareil/pays/canal.
 
     `totals_only` : ne récupère que les totaux (utile pour la période de
     comparaison, où seuls les deltas globaux sont nécessaires).
+    `channel` : si défini (ex. "Organic Search"), restreint l'audience à ce
+    canal d'acquisition — permet d'exclure le bruit (bots, direct) et de ne
+    garder que le trafic pertinent.
     """
     client = BetaAnalyticsDataClient(credentials=credentials)
+    dim_filter = _channel_filter(channel)
 
-    # Totaux (sans dimension).
+    # Totaux (filtrés par canal si demandé).
     totals_req = RunReportRequest(
         property=f"properties/{property_id}",
         date_ranges=[DateRange(start_date=start.isoformat(), end_date=end.isoformat())],
@@ -190,6 +210,7 @@ def fetch_audience(
             Metric(name="engagementRate"),
             Metric(name="averageSessionDuration"),
         ],
+        dimension_filter=dim_filter,
     )
     tr = client.run_report(totals_req)
     aud = Audience()
@@ -203,9 +224,9 @@ def fetch_audience(
         aud.avg_session_duration = round(float(v[5] or 0.0), 1)
 
     if not totals_only:
-        aud.by_device = _breakdown(client, property_id, start, end, "deviceCategory", "totalUsers", limit=10)
-        aud.by_country = _breakdown(client, property_id, start, end, "country", "totalUsers", limit=8)
+        aud.by_device = _breakdown(client, property_id, start, end, "deviceCategory", "totalUsers", limit=10, dimension_filter=dim_filter)
+        aud.by_country = _breakdown(client, property_id, start, end, "country", "totalUsers", limit=8, dimension_filter=dim_filter)
         aud.by_channel = _breakdown(
-            client, property_id, start, end, "sessionDefaultChannelGroup", "sessions", limit=10
+            client, property_id, start, end, "sessionDefaultChannelGroup", "sessions", limit=10, dimension_filter=dim_filter
         )
     return aud

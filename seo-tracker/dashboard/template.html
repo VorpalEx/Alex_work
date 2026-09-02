@@ -331,6 +331,8 @@
   <section class="view" id="view-users">
     <div id="u-empty" class="empty" hidden>Les données d'audience (GA4) apparaîtront ici avec les vraies données.</div>
     <div id="u-content" hidden>
+      <div class="toolbar"><div class="seg" id="u-scope" role="group" aria-label="Filtrer le trafic"></div>
+        <span class="count-note" id="u-scope-note"></span></div>
       <div class="kpis" id="u-kpis"></div>
       <div class="cmp-note" id="u-cmp" hidden></div>
       <div class="cols">
@@ -583,8 +585,8 @@
 
   // --- État & courant ------------------------------------------------------
   const tip = $("#tip");
-  let arts=[], kws=[], pathTitle={}, curAudience=null, curPrevPeriod="";
-  let state = {tab:"overview", sort:{}, secFilter:"Tout", langFilter:"Tout", kwQuery:"", detail:null, section:null};
+  let arts=[], kws=[], pathTitle={}, curAudience=null, curAudienceOrg=null, curPrevPeriod="";
+  let state = {tab:"overview", sort:{}, secFilter:"Tout", langFilter:"Tout", kwQuery:"", detail:null, section:null, userScope:"all"};
 
   function makeTable(headEl, bodyEl, cols, getRows, defSort, key){
     if(!state.sort[key]) state.sort[key] = {k:defSort.k, dir:defSort.dir};
@@ -818,11 +820,24 @@
   }
 
   function renderUsers(){
-    const a = curAudience;
-    const has = a && (a.total_users || a.sessions || a.views);
-    $("#u-empty").hidden = !!has;
-    $("#u-content").hidden = !has;
-    if(!has) return;
+    const hasAll = curAudience && (curAudience.total_users || curAudience.sessions || curAudience.views);
+    $("#u-empty").hidden = !!hasAll;
+    $("#u-content").hidden = !hasAll;
+    if(!hasAll) return;
+    // Sélecteur Tout le trafic / Recherche organique (si l'organique est dispo).
+    const hasOrg = curAudienceOrg && (curAudienceOrg.total_users || curAudienceOrg.sessions);
+    const seg=$("#u-scope");
+    if(hasOrg){
+      seg.hidden=false;
+      const opts=[["all","Tout le trafic"],["organic","🔍 Recherche organique"]];
+      seg.innerHTML=opts.map(([k,l])=>`<button data-sc="${k}" aria-pressed="${k===state.userScope}">${l}</button>`).join("");
+      seg.querySelectorAll("button").forEach(b=>b.onclick=()=>{state.userScope=b.dataset.sc;
+        seg.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b)); renderUsers();});
+    } else { seg.hidden=true; state.userScope="all"; }
+    $("#u-scope-note").textContent = state.userScope==="organic"
+      ? "Visiteurs venus de la recherche Google (exclut le direct / les bots)."
+      : "Tout le trafic du site (peut inclure des bots).";
+    const a = (state.userScope==="organic" && hasOrg) ? curAudienceOrg : curAudience;
     $("#u-kpis").innerHTML = [
       {lbl:"Utilisateurs", val:fmt(a.total_users), d:a.d_total_users},
       {lbl:"Nouveaux utilisateurs", val:fmt(a.new_users), d:a.d_new_users, accent:true},
@@ -863,6 +878,7 @@
     kws = (p.keywords||[]).map(k=>({...k}));
     pathTitle={}; arts.forEach(a=>pathTitle[a.path]=a.title);
     curAudience = p.audience || null;
+    curAudienceOrg = p.audience_organic || null;
     curPrevPeriod = p.prev_period || "";
     $("#m-range").textContent = p.period || p.label || "";
     const cmp=$("#cmp-note");

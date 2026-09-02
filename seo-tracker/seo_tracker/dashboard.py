@@ -111,12 +111,15 @@ def build_data(
         key, label, start, end, prev_start, prev_end, articles = p[:7]
         audience = p[7] if len(p) > 7 else None
         prev_audience = p[8] if len(p) > 8 else None
+        audience_org = p[9] if len(p) > 9 else None
+        prev_audience_org = p[10] if len(p) > 10 else None
         periods.append({
             "key": key,
             "label": label,
             "period": f"{_fr_date(start)} – {_fr_date(end)}",
             "prev_period": f"{_fr_date(prev_start)} – {_fr_date(prev_end)}",
             "audience": _audience_block(audience, prev_audience),
+            "audience_organic": _audience_block(audience_org, prev_audience_org),
             **_rows(articles),
         })
     keys = {p["key"] for p in periods}
