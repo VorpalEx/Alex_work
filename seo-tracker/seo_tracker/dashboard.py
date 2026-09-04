@@ -157,6 +157,18 @@ def write_dashboard(data: dict, out_html: Path) -> None:
     out_html.write_text(html, encoding="utf-8")
 
 
+def write_data_json(data: dict, out_dir: Path) -> None:
+    """Écrit data.json : le jeu de données complet, destiné à être consommé par
+    des outils tiers (feed en lecture seule). Contient meta + toutes les périodes
+    (articles avec données croisées SEO/GA4 + sources, mots-clés, audience)."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    payload = dict(data)
+    payload["meta"] = {**data.get("meta", {}), "schema_version": 1}
+    (out_dir / "data.json").write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+
 def write_csv(data: dict, out_dir: Path) -> None:
     """Écrit articles.csv et keywords.csv de la période par défaut (';', UTF-8 BOM)."""
     out_dir.mkdir(parents=True, exist_ok=True)

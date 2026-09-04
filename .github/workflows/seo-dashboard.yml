@@ -78,6 +78,7 @@ jobs:
             seo-tracker/out/dashboard.html
             seo-tracker/out/articles.csv
             seo-tracker/out/keywords.csv
+            seo-tracker/out/data.json
           retention-days: 30
 
       # Prépare le site : le dashboard devient la page d'accueil (index.html).
@@ -88,6 +89,7 @@ jobs:
           mkdir -p _site
           cp seo-tracker/out/dashboard.html _site/index.html
           cp seo-tracker/out/articles.csv seo-tracker/out/keywords.csv _site/ || true
+          cp seo-tracker/out/data.json _site/ || true
 
       - name: Uploader l'artefact Pages
         uses: actions/upload-pages-artifact@v3

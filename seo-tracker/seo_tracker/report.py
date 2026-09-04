@@ -12,7 +12,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from .config import Config, ConfigError
-from .dashboard import build_data, write_csv, write_dashboard
+from .dashboard import build_data, write_csv, write_dashboard, write_data_json
 from .framer import fetch_inventory_or_empty as _fetch_inventory
 from .ga4 import fetch_audience, fetch_page_metrics, fetch_page_sources
 from .google_auth import build_credentials
@@ -89,9 +89,10 @@ def run(out_dir: Path) -> int:
     html_path = out_dir / "dashboard.html"
     write_dashboard(data, html_path)
     write_csv(data, out_dir)
+    write_data_json(data, out_dir)
 
     log.info("Dashboard écrit : %s", html_path)
-    log.info("Exports CSV : %s/articles.csv, %s/keywords.csv", out_dir, out_dir)
+    log.info("Exports : %s/articles.csv, %s/keywords.csv, %s/data.json", out_dir, out_dir, out_dir)
     log.info("Terminé ✅")
     return 0
 
