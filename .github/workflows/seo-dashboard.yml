@@ -90,6 +90,7 @@ jobs:
           cp seo-tracker/out/dashboard.html _site/index.html
           cp seo-tracker/out/articles.csv seo-tracker/out/keywords.csv _site/ || true
           cp seo-tracker/out/data.json _site/ || true
+          cp docs/INTEGRATION.md _site/ || true
 
       - name: Uploader l'artefact Pages
         uses: actions/upload-pages-artifact@v3
