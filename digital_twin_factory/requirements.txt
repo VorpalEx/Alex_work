@@ -1,0 +1,30 @@
+# ============================================================
+# Digital Twin Factory — Python dependencies
+# Python 3.11 required
+# ============================================================
+
+# --- UI ---
+PyQt6>=6.6.0
+
+# --- AI / RAG / PDF ---
+langchain>=0.1.0
+langchain-community>=0.0.20
+pypdf>=3.17.0
+# Optional: uncomment for OpenAI-powered extraction
+# langchain-openai>=0.0.5
+
+# --- Graph ---
+networkx>=3.2
+
+# --- HTTP / SaaS connectors ---
+requests>=2.31.0
+
+# --- Security / Crypto ---
+cryptography>=42.0.0
+
+# --- Build / Packaging ---
+pyinstaller>=6.3.0
+
+# --- Dev / Test ---
+pytest>=8.0.0
+pytest-qt>=4.4.0
